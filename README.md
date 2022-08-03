@@ -18,18 +18,20 @@ lmao
 
 ## Setup
 
-Run the setup script to choose a model to use. This will download the model from Huggingface and then convert it for use with FasterTransformer. Right now the 2B model is not available because of a [hard-coded check](https://github.com/NVIDIA/FasterTransformer/blob/main/src/fastertransformer/layers/attention_layers/DecoderSelfAttentionLayer.cc#L231-L232) in FasterTransformer that excludes it; hopefully this can be fixed soon!
+Run the setup script to choose a model to use. This will download the model from Huggingface and then convert it for use with FasterTransformer.
 
 ```
 $ ./setup.sh 
 Models available:
 [1] codegen-350M-mono (2GB total VRAM required; Python-only)
 [2] codegen-350M-multi (2GB total VRAM required; multi-language)
-[3] codegen-6B-mono (13GB total VRAM required; Python-only)
-[4] codegen-6B-multi (13GB total VRAM required; multi-language)
-[5] codegen-16B-mono (32GB total VRAM required; Python-only)
-[6] codegen-16B-multi (32GB total VRAM required; multi-language)
-Enter your choice [4]: 2
+[3] codegen-2B-mono (7GB total VRAM required; Python-only)
+[4] codegen-2B-multi (7GB total VRAM required; multi-language)
+[5] codegen-6B-mono (13GB total VRAM required; Python-only)
+[6] codegen-6B-multi (13GB total VRAM required; multi-language)
+[7] codegen-16B-mono (32GB total VRAM required; Python-only)
+[8] codegen-16B-multi (32GB total VRAM required; multi-language)
+Enter your choice [6]: 2
 Enter number of GPUs [1]: 1
 Where do you want to save the model [/home/moyix/git/fauxpilot/models]? /fastdata/mymodels
 Downloading and converting the model, this will take a while...

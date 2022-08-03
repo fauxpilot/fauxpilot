@@ -9,21 +9,25 @@ fi
 echo "Models available:"
 echo "[1] codegen-350M-mono (2GB total VRAM required; Python-only)"
 echo "[2] codegen-350M-multi (2GB total VRAM required; multi-language)"
-echo "[3] codegen-6B-mono (13GB total VRAM required; Python-only)"
-echo "[4] codegen-6B-multi (13GB total VRAM required; multi-language)"
-echo "[5] codegen-16B-mono (32GB total VRAM required; Python-only)"
-echo "[6] codegen-16B-multi (32GB total VRAM required; multi-language)"
+echo "[3] codegen-2B-mono (7GB total VRAM required; Python-only)"
+echo "[4] codegen-2B-multi (7GB total VRAM required; multi-language)"
+echo "[5] codegen-6B-mono (13GB total VRAM required; Python-only)"
+echo "[6] codegen-6B-multi (13GB total VRAM required; multi-language)"
+echo "[7] codegen-16B-mono (32GB total VRAM required; Python-only)"
+echo "[8] codegen-16B-multi (32GB total VRAM required; multi-language)"
 # Read their choice
-read -p "Enter your choice [4]: " MODEL_NUM
+read -p "Enter your choice [6]: " MODEL_NUM
 
 # Convert model number to model name
 case $MODEL_NUM in
     1) MODEL="codegen-350M-mono" ;;
     2) MODEL="codegen-350M-multi" ;;
-    3) MODEL="codegen-6B-mono" ;;
-    4) MODEL="codegen-6B-multi" ;;
-    5) MODEL="codegen-16B-mono" ;;
-    6) MODEL="codegen-16B-multi" ;;
+    3) MODEL="codegen-2B-mono" ;;
+    4) MODEL="codegen-2B-multi" ;;
+    5) MODEL="codegen-6B-mono" ;;
+    6) MODEL="codegen-6B-multi" ;;
+    7) MODEL="codegen-16B-mono" ;;
+    8) MODEL="codegen-16B-multi" ;;
     *) MODEL="codegen-6B-multi" ;;
 esac
 
