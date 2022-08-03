@@ -53,4 +53,4 @@ mkdir -p "${MODEL_DIR}"
 
 echo "Downloading and converting the model, this will take a while..."
 docker run --rm -v ${MODEL_DIR}:/models -e MODEL=${MODEL} -e NUM_GPUS=${NUM_GPUS} moyix/model_conveter:latest
-echo "Done! Now run launch.sh to start the FauxPilot server."
+echo "Done! Now run ./launch.sh to start the FauxPilot server."
