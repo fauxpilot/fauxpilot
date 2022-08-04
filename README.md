@@ -15,7 +15,7 @@ Note that the VRAM requirements listed by `setup.sh` are *total* -- if you have 
 
 ## Support and Warranty
 
-lmao
+LMAO
 
 ## Setup
 
