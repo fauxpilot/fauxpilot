@@ -7,7 +7,13 @@ if [ ! -f config.env ]; then
 fi
 source config.env
 
+# On newer versions, docker-compose is docker compose
+DOCKER_COMPOSE=$(command -v docker-compose)
+if [ -z "$DOCKER_COMPOSE" ]; then
+    DOCKER_COMPOSE="docker compose"
+fi
+
 export NUM_GPUS=${NUM_GPUS}
 export MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
 export GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
-docker-compose up
+$DOCKER_COMPOSE up
