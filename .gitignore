@@ -8,3 +8,8 @@ models/*
 .vscode
 .vscode/*
 .history
+
+# VidualStudioCode extension
+extension/.vscode
+extension/node_modules
+extension/dist
