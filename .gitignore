@@ -1,1 +1,10 @@
 config.env
+
+
+# Codegen Models
+models/*
+
+# VisualStudioCode
+.vscode
+.vscode/*
+.history
