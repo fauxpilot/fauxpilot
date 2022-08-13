@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Read in config.env file; error if not found
 if [ ! -f config.env ]; then
