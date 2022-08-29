@@ -7,7 +7,7 @@ This is an attempt to build a locally hosted version of [GitHub Copilot](https:/
 You'll need:
 
 * Docker
-* `docker-compose` >= 1.28
+* `docker compose` >= 1.28
 * An NVIDIA GPU with Compute Capability >= 7.0 and enough VRAM to run the model you want.
 * [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker)
 * `curl` and `zstd` for downloading and unpacking the models.
