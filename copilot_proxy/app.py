@@ -5,6 +5,7 @@ import random
 import string
 from flask import Flask, request
 import numpy as np
+from flask_wtf.csrf import CSRFProtect
 np.finfo(np.dtype("float32"))
 np.finfo(np.dtype("float64"))
 import tritonclient.grpc as client_util
@@ -240,7 +241,10 @@ class CodeGenProxy:
             return self.non_streamed_response(completion, choices)
 
 codegen = CodeGenProxy(host='triton')
+# OpenRefactory Warning: The 'Flask' method creates a Flask app
+# without Cross-Site Request Forgery (CSRF) protection.
 app = Flask(__name__)
+CSRFProtect(app)
 
 @app.route("/v1/engines/codegen/completions", methods=["POST"])
 def completions():
