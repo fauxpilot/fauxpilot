@@ -39,6 +39,8 @@ NUM_GPUS=${NUM_GPUS:-1}
 read -p "Where do you want to save the model [$(pwd)/models]? " MODEL_DIR
 if [ -z "$MODEL_DIR" ]; then
     MODEL_DIR="$(pwd)/models"
+else
+    MODEL_DIR="$(readlink -m "${MODEL_DIR}")"
 fi
 
 # Write config.env
