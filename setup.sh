@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -f config.env ]; then
     echo "config.env already exists, skipping"
