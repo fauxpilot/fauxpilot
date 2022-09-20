@@ -23,6 +23,7 @@ app = FastAPI(
 
 
 @app.post("/v1/engines/codegen/completions", status_code=200)
+@app.post("/v1/completions", status_code=200)
 async def completions(data: OpenAIinput):
     data = data.dict()
     print(data)
