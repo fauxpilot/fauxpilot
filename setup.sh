@@ -3,14 +3,14 @@
 if [ -f config.env ]; then
     echo "config.env already exists, skipping"
     echo "Please delete config.env if you want to re-run this script"
-    exit 0
+    exit 1
 fi
 
 function check_dep(){
     echo "Checking for $1 ..."
     which "$1" 2>/dev/null || {
         echo "Please install $1."
-        exit 0
+        exit 1
     }
 }
 check_dep curl
