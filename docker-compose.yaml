@@ -30,4 +30,4 @@ services:
       # You can modify this env file to configure your proxy environment
       - example.env
     ports:
-      - "5001:${API_PORT}"
+      - "5000:5000"
