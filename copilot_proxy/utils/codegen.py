@@ -111,7 +111,7 @@ class CodeGenProxy:
         if stop_words is None:
             stop_words = []
         if stop_words:
-            stop_word_list = np.repeat(to_word_list_format([stop_words], self.tokenizer), input_start_ids.shape[0],
+            stop_word_list = np.repeat(self.to_word_list_format([stop_words], self.tokenizer), input_start_ids.shape[0],
                                        axis=0)
         else:
             stop_word_list = np.concatenate([np.zeros([input_start_ids.shape[0], 1, 1]).astype(
