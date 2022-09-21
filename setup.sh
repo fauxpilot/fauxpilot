@@ -61,9 +61,11 @@ echo "NUM_GPUS=${NUM_GPUS}" >> config.env
 echo "MODEL_DIR=${MODEL_DIR}" >> config.env
 
 if [ -d "$MODEL_DIR"/"${MODEL}"-${NUM_GPUS}gpu ]; then
-    echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists, skipping"
-    echo "Please delete ${MODEL_DIR}/${MODEL}-${NUM_GPUS}gpu if you want to re-convert it"
-    exit 0
+    echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
+    read -p "Do you want to re-use it? y/n: " REUSE_CHOICE
+    if [ "${REUSE_CHOICE^^}" = "Y" ]; then
+        exit 0
+    fi
 fi
 
 # Create model directory
