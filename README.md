@@ -20,7 +20,7 @@ lmao
 
 ## Setup
 
-Run the setup script to choose a model to use. This will download the model from Huggingface and then convert it for use with FasterTransformer.
+Run the setup script to choose a model to use. This will download the model from [Huggingface/Moyix](https://huggingface.co/Moyix) in GPT-J format and then convert it for use with FasterTransformer.
 
 ```
 $ ./setup.sh 
