@@ -8,7 +8,7 @@ from models import OpenAIinput
 from utils.codegen import CodeGenProxy
 
 codegen = CodeGenProxy(
-    host=os.environ.get("TRITON_HOST", "localhost"),
+    host=os.environ.get("TRITON_HOST", "triton"),
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )

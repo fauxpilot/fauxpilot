@@ -18,13 +18,16 @@ services:
               count: all
               capabilities: [gpu]
   copilot_proxy:
-    image: moyix/copilot_proxy:latest
+    # For dockerhub version
+    # image: moyix/copilot_proxy:latest
+    # command: python3 -m flask run --host=0.0.0.0 --port=5000
     # For local build
-#    build:
-#      context: .
-#      dockerfile: copilot_proxy/Dockerfile
-    command: uvicorn app:app --host $API_HOST --port $API_PORT
+    build:
+      context: .
+      dockerfile: copilot_proxy/Dockerfile
+    command: uvicorn app:app --host 0.0.0.0 --port 5000
     env_file:
-      - .env
+      # You can modify this env file to configure your proxy environment
+      - example.env
     ports:
-      - "5001:${API_PORT}"
+      - "5000:5000"
