@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -f .env ]; then
     read -rp ".env already exists, do you want to delete .env and recreate it? [y/n] " DELETE
