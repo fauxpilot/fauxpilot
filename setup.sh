@@ -71,28 +71,28 @@ echo "GPUS=${GPUS%?}" >> .env
 if [ -d "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ]; then
     echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
     read -rp "Do you want to re-use it? y/n: " REUSE_CHOICE
-    if [ "${REUSE_CHOICE^^}" = "Y" ]; then
-        exit 0
+    if [[ ${REUSE_CHOICE:-y} =~ ^[Yy]$ ]]
+    then
+        echo "Re-using model"
+    else
+      # Create model directory
+      mkdir -p "${MODEL_DIR}"
+
+      if [ "$NUM_GPUS" -le 2 ]; then
+        echo "Downloading the model from HuggingFace, this will take a while..."
+        SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+        DEST="${MODEL}-${NUM_GPUS}gpu"
+        ARCHIVE="${MODEL_DIR}/${DEST}.tar.zst"
+        cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODEL_DIR}"
+        curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
+            -o "$ARCHIVE"
+        zstd -dc "$ARCHIVE" | tar -xf - -C "${MODEL_DIR}"
+        rm -f "$ARCHIVE"
+      else
+        echo "Downloading and converting the model, this will take a while..."
+        docker run --rm -v "${MODEL_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
+      fi
     fi
-fi
-
-# Create model directory
-mkdir -p "${MODEL_DIR}"
-
-# For some of the models we can download it pre-converted.
-if [ $NUM_GPUS -le 2 ]; then
-    echo "Downloading the model from HuggingFace, this will take a while..."
-    SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-    DEST="${MODEL}-${NUM_GPUS}gpu"
-    ARCHIVE="${MODEL_DIR}/${DEST}.tar.zst"
-    cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODEL_DIR}"
-    curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
-        -o "$ARCHIVE"
-    zstd -dc "$ARCHIVE" | tar -xf - -C "${MODEL_DIR}"
-    rm -f "$ARCHIVE"
-else
-    echo "Downloading and converting the model, this will take a while..."
-    docker run --rm -v "${MODEL_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
 fi
 
 read -rp "Config complete, do you want to run FauxPilot? [y/n]" RUN
