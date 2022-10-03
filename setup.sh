@@ -12,6 +12,18 @@ if [ -f .env ]; then
     fi;
 fi
 
+function check_dep(){
+    echo "Checking for $1 ..."
+    which "$1" 2>/dev/null || {
+        echo "Please install $1."
+        exit 1
+    }
+}
+check_dep curl
+check_dep zstd
+check_dep docker
+
+
 echo "Models available:"
 echo "[1] codegen-350M-mono (2GB total VRAM required; Python-only)"
 echo "[2] codegen-350M-multi (2GB total VRAM required; multi-language)"

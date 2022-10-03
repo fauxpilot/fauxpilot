@@ -8,9 +8,8 @@ fi
 source .env
 
 # On newer versions, docker-compose is docker compose
-DOCKER_COMPOSE=$(command -v docker-compose)
-if [ -z "$DOCKER_COMPOSE" ]; then
-    DOCKER_COMPOSE="docker compose"
+if command -v docker-compose > /dev/null; then
+    docker compose up
+else
+    docker-compose up
 fi
-
-$DOCKER_COMPOSE up
