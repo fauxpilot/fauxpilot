@@ -8,7 +8,7 @@ from models import OpenAIinput
 from utils.codegen import CodeGenProxy
 
 codegen = CodeGenProxy(
-    host=os.environ.get("TRITON_HOST", "localhost"),
+    host=os.environ.get("TRITON_HOST", "triton"),
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )
@@ -41,4 +41,4 @@ async def completions(data: OpenAIinput):
         )
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host=os.environ.get("API_HOST", "0.0.0.0"), port=os.environ.get("API_PORT", 5000))
+    uvicorn.run("app:app", host="0.0.0.0", port=5000)

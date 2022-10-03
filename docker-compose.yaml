@@ -23,8 +23,7 @@ services:
 #    build:
 #      context: .
 #      dockerfile: copilot_proxy/Dockerfile
-    command: uvicorn app:app --host $API_HOST --port $API_PORT
     env_file:
       - .env
     ports:
-      - "5001:${API_PORT}"
+      - "${API_EXTERNAL_PORT}:5000"
