@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class OpenAIinput(BaseModel):
-    model: str
+    model: Optional[str] = 'codegen'
     prompt: Optional[str]
     suffix: Optional[str]
     max_tokens: Optional[int] = 16
