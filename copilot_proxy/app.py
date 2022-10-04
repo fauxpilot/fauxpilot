@@ -2,7 +2,7 @@ import os
 
 import uvicorn
 from fastapi import FastAPI, Response
-from sse_starlette.sse import EventSourceResponse
+from fastapi.responses import StreamingResponse
 
 from models import OpenAIinput
 from utils.codegen import CodeGenProxy
@@ -28,9 +28,9 @@ async def completions(data: OpenAIinput):
     data = data.dict()
     print(data)
     if data.get("stream") is not None:
-        return EventSourceResponse(
-            content=codegen(data=data),
+        return StreamingResponse(
             status_code=200,
+            content=codegen(data=data),
             media_type="text/event-stream"
         )
     else:
