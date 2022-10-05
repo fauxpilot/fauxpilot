@@ -37,7 +37,7 @@ Please refer to [How to set-up a FauxPilot server](documentation/server.md).
 
 ### Client configuration for FauxPilot
 
-We offer some ways to connect to FAUXPILOT Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
+We offer some ways to connect to FauxPilot Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
 
 Please refer to [How to set-up a client](documentation/client.md).
 
