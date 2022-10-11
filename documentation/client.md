@@ -1,4 +1,4 @@
-We offer some ways to connect to FAUXPILOT Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
+We offer some ways to connect to the FauxPilot Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
 
 ## API
 
