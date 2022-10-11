@@ -2,11 +2,11 @@ FROM python:3.10-slim-buster
 
 WORKDIR /python-docker
 
-COPY copilot_proxy/requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY copilot_proxy .
+COPY . .
 
 EXPOSE 5000
 

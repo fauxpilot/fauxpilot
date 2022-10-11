@@ -23,8 +23,8 @@ services:
     # command: python3 -m flask run --host=0.0.0.0 --port=5000
     # For local build
     build:
-      context: .
-      dockerfile: copilot_proxy/Dockerfile
+      context: ./copilot_proxy
+      dockerfile: Dockerfile
     command: uvicorn app:app --host 0.0.0.0 --port 5000
     env_file:
       # You can modify this env file to configure your proxy environment
