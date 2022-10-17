@@ -8,8 +8,16 @@ fi
 source config.env
 
 export NUM_GPUS=${NUM_GPUS}
-export MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
+
+# if model name starts with "py-", it means we're dealing with the python backend.
+if [[ $(echo "$MODEL" | cut -c1-3) == "py-" ]]; then
+    export MODEL_DIR="${MODEL_DIR}"/"${MODEL}" #/py_model"
+else
+    export MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
+fi
+
 export GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
+export HF_CACHE_DIR=${HF_CACHE_DIR}
 
 # On newer versions, docker-compose is docker compose
 if command -v docker-compose > /dev/null; then
