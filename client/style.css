@@ -1,0 +1,33 @@
+
+/* highlight */
+.p-li{font-size:1.1em;color:darkslategrey;line-height:1.5;}
+.p-la{font-size:1.1em;line-height:1.5;}
+.xl{font-size:1.1em;line-height:1.8;}                                                                                        
+.sourcecode{font-family:Consolas,monaco,monospace;font-size:0.9em;}
+.kb-source{font-family:Consolas,monaco,monospace;font-size:0.9em;border:1px solid lightgray;background-color:#FAFAFC;color:blue;padding:1em;margin:1em 0;}
+.c-source{font-family:Consolas,monaco,monospace;font-size:0.9em;border:1px solid lightgray;background-color:#FAFAFC;padding:1em;margin:1em 0;}
+.c-warning{font-family:Consolas,monaco,monospace;font-size:0.9em;border:1px solid firebrick;background-color:#FFF9F9;padding:1em;margin:1em 0;}
+.c-shopgreen{font-size:1.125em;border:1px solid forestgreen;background-color:mintcream;padding:1em;margin:1em 0;}
+
+/* image style */
+.img-sh{box-shadow:0em 0em 1em lightgrey;}
+.ico-sh{text-shadow:1px 1px 5px lightgrey;}
+
+/* buttons */
+.butt{display:inline-block;padding:0 1.5rem;margin-top:0.5rem;line-height:2.5rem;border-radius:0.1em;color:#FFF;font-weight:500;font-size:1em;background:linear-gradient(rgba(0,0,0,0) 0%,rgba(0,0,0,0.1) 100%),gray;}
+.butt:link{color:#FFF;text-decoration:none;}
+.butt:visited{color:#FFF;}
+.butt:hover{background-color:coral;color:#FFF;}
+.butt:active{position:relative;top:0.075em;}
+.butt-blue{background-color:steelblue;}
+.butt-green{background-color:lightseagreen;}
+.butt-red{background-color:firebrick;}
+
+/* customized font size */
+li {
+  font-size: 14px;
+}
+
+form {
+  font-size: 14px;
+}
