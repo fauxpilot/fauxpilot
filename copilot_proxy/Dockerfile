@@ -1,12 +1,15 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:latest
 
-FROM python:3.8-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /python-docker
 
-COPY requirements.txt requirements.txt
+COPY copilot_proxy/requirements.txt requirements.txt
+
 RUN --mount=type=cache,target=/root/.cache/pip/ pip3 install -r requirements.txt
 
-COPY . .
+COPY copilot_proxy .
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+EXPOSE 5000
+
+CMD [ "uvicorn", "--host", "0.0.0.0", "--port", "5000", "app:app"]

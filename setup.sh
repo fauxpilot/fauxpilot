@@ -1,10 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -f config.env ]; then
     echo "config.env already exists, skipping"
     echo "Please delete config.env if you want to re-run this script"
-    exit 0
+    exit 1
 fi
+
+function check_dep(){
+    echo "Checking for $1 ..."
+    which "$1" 2>/dev/null || {
+        echo "Please install $1."
+        exit 1
+    }
+}
+check_dep curl
+check_dep zstd
+check_dep docker
+
 
 echo "Models available:"
 echo "[1] codegen-350M-mono (2GB total VRAM required; Python-only)"
@@ -49,9 +61,11 @@ echo "NUM_GPUS=${NUM_GPUS}" >> config.env
 echo "MODEL_DIR=${MODEL_DIR}" >> config.env
 
 if [ -d "$MODEL_DIR"/"${MODEL}"-${NUM_GPUS}gpu ]; then
-    echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists, skipping"
-    echo "Please delete ${MODEL_DIR}/${MODEL}-${NUM_GPUS}gpu if you want to re-convert it"
-    exit 0
+    echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
+    read -p "Do you want to re-use it? y/n: " REUSE_CHOICE
+    if [ "${REUSE_CHOICE^^}" = "Y" ]; then
+        exit 0
+    fi
 fi
 
 # Create model directory
