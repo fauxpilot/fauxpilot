@@ -77,37 +77,45 @@ echo "MODEL_DIR=${MODEL_DIR}/${MODEL}-${NUM_GPUS}gpu" >> .env
 echo "API_EXTERNAL_PORT=${API_EXTERNAL_PORT}" >> .env
 echo "TRITON_HOST=${TRITON_HOST}" >> .env
 echo "TRITON_PORT=${TRITON_PORT}" >> .env
-GPUS="$(seq -s ','  -t '\n' "${NUM_GPUS}")"
-echo "GPUS=${GPUS%?}" >> .env
+echo "GPUS=$(seq 0 $(( NUM_GPUS - 1)) | paste -s -d ',' -)" >> .env
 
-if [ -d "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ]; then
-    echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
-    read -rp "Do you want to re-use it? y/n: " REUSE_CHOICE
-    if [[ ${REUSE_CHOICE:-y} =~ ^[Yy]$ ]]
-    then
-        echo "Re-using model"
-    else
-      # Create model directory
-      mkdir -p "${MODEL_DIR}"
-
-      if [ "$NUM_GPUS" -le 2 ]; then
-        echo "Downloading the model from HuggingFace, this will take a while..."
-        SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-        DEST="${MODEL}-${NUM_GPUS}gpu"
-        ARCHIVE="${MODEL_DIR}/${DEST}.tar.zst"
-        cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODEL_DIR}"
-        curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
-            -o "$ARCHIVE"
-        zstd -dc "$ARCHIVE" | tar -xf - -C "${MODEL_DIR}"
-        rm -f "$ARCHIVE"
-      else
-        echo "Downloading and converting the model, this will take a while..."
-        docker run --rm -v "${MODEL_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
-      fi
-    fi
+if (test -d "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ); then
+  echo "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+  echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
+  read -rp "Do you want to re-use it? y/n: " REUSE_CHOICE
+  if [[ ${REUSE_CHOICE:-y} =~ ^[Yy]$ ]]
+  then
+    DOWNLOAD_MODEL=n
+    echo "Re-using model"
+  else
+    DOWNLOAD_MODEL=y
+    rm -rf "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+  fi
+else
+  DOWNLOAD_MODEL=y
 fi
 
-read -rp "Config complete, do you want to run FauxPilot? [y/n]" RUN
+if [[ ${DOWNLOAD_MODEL:-y} =~ ^[Yy]$ ]]
+then
+  # Create model directory
+  mkdir -p "${MODEL_DIR}"
+  if [ "$NUM_GPUS" -le 2 ]; then
+    echo "Downloading the model from HuggingFace, this will take a while..."
+    SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+    DEST="${MODEL}-${NUM_GPUS}gpu"
+    ARCHIVE="${MODEL_DIR}/${DEST}.tar.zst"
+    cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODEL_DIR}"
+    curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
+        -o "$ARCHIVE"
+    zstd -dc "$ARCHIVE" | tar -xf - -C "${MODEL_DIR}"
+    rm -f "$ARCHIVE"
+  else
+    echo "Downloading and converting the model, this will take a while..."
+    docker run --rm -v "${MODEL_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
+  fi
+fi
+
+read -rp "Config complete, do you want to run FauxPilot? [y/n] " RUN
 if [[ ${RUN:-y} =~ ^[Yy]$ ]]
 then
   bash ./launch.sh
