@@ -115,6 +115,12 @@ then
   fi
 fi
 
+MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
+CONF_PATH="/model/fastertransformer/config.pbtxt"
+GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
+
+docker run --rm -v ${MODEL_DIR}:/model --runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=${GPUS} txy:latest /bin/bash "python3 tune && cp ./gemm_config.ini /model/gemm_config.ini"
+
 read -rp "Config complete, do you want to run FauxPilot? [y/n] " RUN
 if [[ ${RUN:-y} =~ ^[Yy]$ ]]
 then
