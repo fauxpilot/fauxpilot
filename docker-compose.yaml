@@ -28,9 +28,8 @@ services:
     build:
       context: .
       dockerfile: copilot_proxy/Dockerfile
-    command: uvicorn app:app --host 0.0.0.0 --port 5000
     env_file:
-      # You can modify this env file to configure your proxy environment
-      - example.env
+      # Automatically created via ./setup.sh
+      - .env
     ports:
-      - "5000:5000"
+      - "${API_EXTERNAL_PORT}:5000"

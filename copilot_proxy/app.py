@@ -41,4 +41,4 @@ async def completions(data: OpenAIinput):
         )
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host=os.environ.get("API_HOST", "0.0.0.0"), port=os.environ.get("API_PORT", 5000))
+    uvicorn.run("app:app", host="0.0.0.0", port=5000)

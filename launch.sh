@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-# Read in config.env file; error if not found
-if [ ! -f config.env ]; then
-    echo "config.env not found, please run setup.sh"
-    exit 1
+# Read in .env file; error if not found
+if [ ! -f .env ]; then
+    echo ".env not found, running setup.sh"
+    bash setup.sh
 fi
-source config.env
+source .env
 
 export NUM_GPUS=${NUM_GPUS}
+export GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
 
 # if model name starts with "py-", it means we're dealing with the python backend.
 if [[ $(echo "$MODEL" | cut -c1-3) == "py-" ]]; then
@@ -16,12 +17,7 @@ else
     export MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
 fi
 
-export GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
 export HF_CACHE_DIR=${HF_CACHE_DIR}
 
 # On newer versions, docker-compose is docker compose
-if command -v docker-compose > /dev/null; then
-    docker compose up
-else
-    docker-compose up
-fi
+docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
