@@ -23,6 +23,8 @@ check_dep curl
 check_dep zstd
 check_dep docker
 
+############### Common configuration ###############
+
 # Read number of GPUs
 read -rp "Enter number of GPUs [1]: " NUM_GPUS
 NUM_GPUS=${NUM_GPUS:-1}
@@ -36,21 +38,23 @@ TRITON_HOST=${TRITON_HOST:-triton}
 read -rp "Port of Triton host [8001]: " TRITON_PORT
 TRITON_PORT=${TRITON_PORT:-8001}
 
-# Read model directory
-read -rp "Where do you want to save the model [$(pwd)/models]? " MODEL_DIR
-if [ -z "$MODEL_DIR" ]; then
-    MODEL_DIR="$(pwd)/models"
+# Read models root directory (all models go under this)
+read -rp "Where do you want to save your models [$(pwd)/models]? " MODELS_ROOT_DIR
+if [ -z "$MODELS_ROOT_DIR" ]; then
+    MODELS_ROOT_DIR="$(pwd)/models"
 else
-    MODEL_DIR="$(readlink -m "${MODEL_DIR}")"
+    MODELS_ROOT_DIR="$(readlink -m "${MODELS_ROOT_DIR}")"
 fi
+mkdir -p "$MODELS_ROOT_DIR"
 
 # Write .env
 echo "NUM_GPUS=${NUM_GPUS}" >> .env
-echo "MODEL_DIR=${MODEL_DIR}/${MODEL}-${NUM_GPUS}gpu" >> .env
+echo "GPUS=$(seq 0 $(( NUM_GPUS - 1)) | paste -s -d ',' -)" >> .env
 echo "API_EXTERNAL_PORT=${API_EXTERNAL_PORT}" >> .env
 echo "TRITON_HOST=${TRITON_HOST}" >> .env
 echo "TRITON_PORT=${TRITON_PORT}" >> .env
-echo "GPUS=$(seq 0 $(( NUM_GPUS - 1)) | paste -s -d ',' -)" >> .env
+
+############### Backend specific configuration ###############
 
 function fastertransformer_backend(){
     echo "Models available:"
@@ -78,10 +82,11 @@ function fastertransformer_backend(){
         *) MODEL="codegen-6B-multi" ;;
     esac
 
-    echo "MODEL=${MODEL}" > .env
+    echo "MODEL=${MODEL}" >> .env
+    echo "MODEL_DIR=${MODELS_ROOT_DIR}/${MODEL}-${NUM_GPUS}gpu" >> .env
 
-    if (test -d "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ); then
-      echo "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+    if (test -d "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ); then
+      echo "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
       echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
       read -rp "Do you want to re-use it? y/n: " REUSE_CHOICE
       if [[ ${REUSE_CHOICE:-y} =~ ^[Yy]$ ]]
@@ -90,7 +95,7 @@ function fastertransformer_backend(){
         echo "Re-using model"
       else
         DOWNLOAD_MODEL=y
-        rm -rf "$MODEL_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+        rm -rf "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
       fi
     else
       DOWNLOAD_MODEL=y
@@ -98,21 +103,19 @@ function fastertransformer_backend(){
 
     if [[ ${DOWNLOAD_MODEL:-y} =~ ^[Yy]$ ]]
     then
-      # Create model directory
-      mkdir -p "${MODEL_DIR}"
       if [ "$NUM_GPUS" -le 2 ]; then
         echo "Downloading the model from HuggingFace, this will take a while..."
         SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
         DEST="${MODEL}-${NUM_GPUS}gpu"
-        ARCHIVE="${MODEL_DIR}/${DEST}.tar.zst"
-        cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODEL_DIR}"
+        ARCHIVE="${MODELS_ROOT_DIR}/${DEST}.tar.zst"
+        cp -r "$SCRIPT_DIR"/converter/models/"$DEST" "${MODELS_ROOT_DIR}"
         curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
             -o "$ARCHIVE"
-        zstd -dc "$ARCHIVE" | tar -xf - -C "${MODEL_DIR}"
+        zstd -dc "$ARCHIVE" | tar -xf - -C "${MODELS_ROOT_DIR}"
         rm -f "$ARCHIVE"
       else
         echo "Downloading and converting the model, this will take a while..."
-        docker run --rm -v "${MODEL_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
+        docker run --rm -v "${MODELS_ROOT_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
       fi
     fi
 }
@@ -154,14 +157,14 @@ function python_backend(){
     fi
 
     # Write config.env
-    echo "MODEL=py-${MODEL}" > config.env
-    echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> config.env
+    echo "MODEL=py-${MODEL}" >> .env
+    echo "MODEL_DIR=${MODELS_ROOT_DIR}/py-${ORG}-${MODEL}" >> .env  # different format from fastertransformer backend
+    echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> .env
 
-    # Create model directory
-    mkdir -p "${MODEL_DIR}/"
-
-    python3 ./python_backend/init_model.py --model_name "${MODEL}" --org_name "${ORG}" --model_dir "${MODEL_DIR}" --use_int8 "${USE_INT8}"
+    python3 ./python_backend/init_model.py --model_name "${MODEL}" --org_name "${ORG}" --model_dir "${MODELS_ROOT_DIR}" --use_int8 "${USE_INT8}"
 }
+
+common_config
 
 # choose backend
 echo "Choose your backend:"

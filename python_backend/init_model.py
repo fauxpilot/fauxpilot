@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 
 # Step1: Make model directory
-model_dir_path = Path(os.path.join(Path(args.model_dir), f"py-{args.model_name}/py-model/1"))
+model_dir_path = Path(os.path.join(Path(args.model_dir), f"py-{args.org_name}-{args.model_name}/py-model/1"))
 model_dir_path.mkdir(parents=True, exist_ok=True)
 
 # Step 2: copy model.py
@@ -41,4 +41,4 @@ config = template.substitute(
 )
 with open(os.path.join(model_dir_path, '../config.pbtxt'), 'w') as f:
     f.write(config)
-    print(f"Config written to")
+    print(f"Config written to {os.path.abspath(f.name)}")
