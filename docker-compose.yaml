@@ -19,12 +19,10 @@ services:
               capabilities: [gpu]
   copilot_proxy:
     # For dockerhub version
-    # image: moyix/copilot_proxy:latest
-    # command: python3 -m flask run --host=0.0.0.0 --port=5000
+    image: moyix/copilot_proxy:latest
     # For local build
-    build:
-      context: .
-      dockerfile: copilot_proxy/Dockerfile
+    # build:
+    #   context: ./copilot_proxy
     env_file:
       # Automatically created via ./setup.sh
       - .env
