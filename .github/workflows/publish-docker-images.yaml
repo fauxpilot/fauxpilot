@@ -1,1 +1,38 @@
 name: Publish Docker Images
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    # The branches below must be a subset of the branches above.
+    branches: [main, master]
+  release:
+    types: [published]
+
+jobs:
+  publish_copilot_proxy:
+    name: Publish copilot_proxy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Extract Docker metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: moyix/copilot_proxy
+
+      - name: Build and push images
+        uses: docker/build-push-action@v3
+        with:
+          # For PRs, just build and not push.
+          push: ${{ github.event_name != 'pull_request' }}
+          context: ./copilot_proxy
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
