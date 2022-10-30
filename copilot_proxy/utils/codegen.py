@@ -4,7 +4,7 @@ import string
 import time
 
 import numpy as np
-import tritonclient.grpc as client_util
+import tritonclient.grpc.aio as client_util
 from tokenizers import Tokenizer
 from tritonclient.utils import np_to_triton_dtype, InferenceServerException
 
@@ -69,7 +69,7 @@ class CodeGenProxy:
 
         return np.array([flat_ids, offsets], dtype="int32").transpose((1, 0, 2))
 
-    def generate(self, data):
+    async def generate(self, data):
         model_name = "fastertransformer"
         prompt = data['prompt']
         n = data.get('n', 1)
@@ -140,7 +140,7 @@ class CodeGenProxy:
             self.prepare_tensor("stop_words_list", stop_word_list),
         ]
 
-        result = self.client.infer(model_name, inputs)
+        result = await self.client.infer(model_name, inputs)
 
         output_data = result.as_numpy("output_ids")
         if output_data is None:
@@ -228,10 +228,10 @@ class CodeGenProxy:
         completion['choices'] = choices
         return json.dumps(completion)
 
-    def __call__(self, data: dict):
+    async def __call__(self, data: dict):
         st = time.time()
         try:
-            completion, choices = self.generate(data)
+            completion, choices = await self.generate(data)
         except InferenceServerException as E:
             print(E)
             completion = {}

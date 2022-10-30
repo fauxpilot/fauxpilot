@@ -14,7 +14,7 @@ from utils.codegen import CodeGenProxy
 SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
 
 codegen = CodeGenProxy(
-    host=os.environ.get("TRITON_HOST", "fauxpilot-triton.codium-inc.com"),
+    host=os.environ.get("TRITON_HOST", "10.128.15.213"),
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )
@@ -82,14 +82,14 @@ async def completions(data: OpenAIinput, user=Depends(get_user_token)):
     print(data)
     if data.get("stream") is not None:
         return EventSourceResponse(
-            content=codegen(data=data),
+            content=await codegen(data=data),
             status_code=200,
             media_type="text/event-stream"
         )
     else:
         return Response(
             status_code=200,
-            content=codegen(data=data),
+            content=await codegen(data=data),
             media_type="application/json"
         )
 
