@@ -15,7 +15,7 @@ np.finfo(np.dtype("float64"))
 
 class CodeGenProxy:
     def __init__(self, host: str = 'triton', port: int = 8001, verbose: bool = False):
-        self.tokenizer = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cgtok', 'tokenizer.json')
+        self.tokenizer = Tokenizer.from_file(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cgtok', 'tokenizer.json'))
         self.client = client_util.InferenceServerClient(url=f'{host}:{port}', verbose=verbose)
         self.PAD_CHAR = 50256
 
