@@ -2,6 +2,7 @@ import os
 
 import uvicorn
 from fastapi import FastAPI
+from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, status, Response, Depends
@@ -9,6 +10,8 @@ from firebase_admin import auth, credentials, initialize_app
 
 from models import OpenAIinput
 from utils.codegen import CodeGenProxy
+
+SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
 
 codegen = CodeGenProxy(
     host=os.environ.get("TRITON_HOST", "fauxpilot-triton.codium-inc.com"),
@@ -32,6 +35,8 @@ except ValueError:
 
 
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))):
+    if not SHOULD_AUTHENTICATE:
+        return None
     if credential is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,10 +55,17 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials = Dep
     return decoded_token
 
 
-@app.get("/v1/auth/login")
-async def hello_user(id_token: str):
+class CustomTokenRequest(BaseModel):
+    id_token: str
+
+
+@app.post("/v1/auth/get_custom_token")
+async def get_custom_token(custom_token_request: CustomTokenRequest):
     try:
-        return auth.create_custom_token(id_token)
+        user = auth.verify_id_token(custom_token_request.id_token)
+        return {
+            "id_token": auth.create_custom_token(user["uid"])
+        }
     except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
