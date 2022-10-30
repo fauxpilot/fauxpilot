@@ -30,7 +30,7 @@ app = FastAPI(
 try:
     admin_credential = credentials.Certificate('../serviceAccountKey.json')
     initialize_app(admin_credential)
-except ValueError:
+except (ValueError, FileNotFoundError):
     pass
 
 
