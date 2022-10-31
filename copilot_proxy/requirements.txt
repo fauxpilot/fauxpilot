@@ -5,3 +5,4 @@ tokenizers==0.12.1
 tritonclient[all]==2.25.0
 uvicorn==0.18.3
 firebase-admin==6.0.1
+ujson==5.5.0
