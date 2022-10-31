@@ -90,10 +90,8 @@ async def playground() -> OpenAIinput:
 
 
 @app.post("/v1/playground", status_code=200, include_in_schema=False)
-async def playground(playground_request: PlaygroundRequest):
-    results = await codegen(data=OpenAIinput(
-        prompt=playground_request.prompt,
-        max_tokens=playground_request.max_tokens).dict())
+async def playground(data: OpenAIinput):
+    results = await codegen(data.dict())
     parsed_results = ujson.loads(results)
     return Response(
         status_code=200,

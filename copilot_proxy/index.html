@@ -43,10 +43,18 @@
         border: 1px solid black;
         border-left: 0;
     }
+
 </style>
 <article>
-    <h2>FauxPilot preview</h2>
-    <p>Press Ctrl/Command + Enter to copy the suggested code</p>
+    <div style="display: flex; justify-content: space-between;">
+        <h1>FauxPilot Playground</h1>
+        <img src="https://pbs.twimg.com/media/FgZ99z3XEAAhp8a?format=jpg&name=medium"
+             style="position: absolute;width: auto;height: 100px;right: 12px;" alt="logo"/>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+        <p>Press Ctrl/Command + Enter to copy the suggested code</p>
+        <p id="loading" style="width: 49.7%;padding-left: 10px;"></p>
+    </div>
     <div class="code">
         <textarea id=code name=code></textarea>
     </div>
@@ -58,6 +66,7 @@
     </div>
     <script>
         let delay;
+        let calls = 0;
         let editor = CodeMirror.fromTextArea(document.getElementById('code'), {
             mode: "python",
             theme: "material-darker",
@@ -86,11 +95,15 @@
             indentUnit: 4,
             lint: true,
         });
+        let loading = document.getElementById('loading');
+
         editor.on("change", function () {
+            calls++;
             clearTimeout(delay);
             delay = setTimeout(updatePreview, 300);
         });
         config.on("change", function () {
+            calls++;
             clearTimeout(delay);
             delay = setTimeout(updatePreview, 300);
         });
@@ -107,24 +120,35 @@
         }
 
         function updatePreview() {
-            let current_code = editor.getValue();
-            let config_json = JSON.parse(config.getValue());
-            if (current_code.length === 0) {
+            loading.innerText = "Loading...";
+            const currentCall = calls;
+            let currentCode = editor.getValue();
+            let configJSON = JSON.parse(config.getValue());
+            if (currentCode.length === 0) {
                 preview.setValue("")
+                loading.innerText = "";
                 return
             }
+            if (currentCall < calls) {
+                return
+            }
+            let timeStart = performance.now();
             fetch("/v1/playground", {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({...config_json, prompt: current_code})
+                body: JSON.stringify({...configJSON, prompt: currentCode})
             }).then(res => {
                 res.text().then(text => {
-                    preview.setValue(current_code + text);
+                    if (currentCall === calls) {
+                        let timeEnd = performance.now();
+                        preview.setValue(currentCode + text);
+                        loading.innerText = `Returned completion in ${Math.round(timeEnd - timeStart)}ms`;
+                    }
                 });
             });
         }
 
-        function bindKeys(key, fn) {
+        function bindKeys() {
             document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey || e.metaKey) {
                     switch (e.code) {
@@ -140,6 +164,5 @@
         bindKeys()
         getOpenAIConfig();
         setTimeout(updatePreview, 300);
-
     </script>
 </article>
