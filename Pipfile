@@ -11,6 +11,7 @@ tokenizers = "==0.12.1"
 tritonclient = {version = "==2.25.0", extras = ["all"]}
 uvicorn = "==0.18.3"
 firebase-admin = "*"
+ujson = "*"
 
 [dev-packages]
 

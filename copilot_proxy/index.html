@@ -1,7 +1,7 @@
 <!doctype html>
 
 <meta charset="UTF-8">
-<title>Code Mirror CDN</title>
+<title>FauxPilot</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css"
       integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
       crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -96,7 +96,7 @@
         });
 
         function getOpenAIConfig() {
-            fetch("http://0.0.0.0:5432/v1/playground/get_config", {
+            fetch("/v1/playground/get_config", {
                 method: "GET",
                 headers: {'Content-Type': 'application/json'},
             }).then(res => {
@@ -113,7 +113,7 @@
                 preview.setValue("")
                 return
             }
-            fetch("http://0.0.0.0:5432/v1/playground", {
+            fetch("/v1/playground", {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({...config_json, prompt: current_code})
