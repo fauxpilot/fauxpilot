@@ -1,0 +1,145 @@
+<!doctype html>
+
+<meta charset="UTF-8">
+<title>Code Mirror CDN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css"
+      integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/theme/material-darker.min.css"
+      integrity="sha512-2OhXH4Il3n2tHKwLLSDPhrkgnLBC+6lHGGQzSFi3chgVB6DJ/v6+nbx+XYO9CugQyHVF/8D/0k3Hx1eaUK2K9g=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/lint/lint.min.css"
+      integrity="sha512-jP1+o6s94WQS9boYeDP3Azh8ihI5BxGgBZNjkABhx05MqH5WuDzfzSnoPxGxVzWi/gxxVHZHvWkdRM6SMy5B0Q=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"
+        integrity="sha512-Kpi2Sp2KpXM2S7aM0p+CwWhm8NuogI15GFPXCmgqAnFr5c86VBXuLEZu0IGBwGSdhhTW6148hP9KTcRMmrjuFQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/python/python.min.js"
+        integrity="sha512-RT0AjIFvx/vuD2Ih9pmIOhlU+HNTpTHGMJ7TORv4oTT0yHqbz9BicxiBohrq84kjvpHnXtWg/wjG0kisHh4EOA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/javascript/javascript.min.js"
+        integrity="sha512-I6CdJdruzGtvDyvdO4YsiAq+pkWf2efgd1ZUSK2FnM/u2VuRASPC7GowWQrWyjxCZn6CT89s3ddGI+be0Ak9Fg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/lint/lint.min.js"
+        integrity="sha512-fzIkwQa9H8rjoDzpZ9sMOYhgaYwh9nKALWbE1m+7wpiry9PN5OyNcZ9LySotjEysolveRyv2C9pVJ+DbEuKtmQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/lint/json-lint.min.js"
+        integrity="sha512-40xVcCik6TlUiZadnRc6ZM0BN65s7F+C3K7eBqGRf8dmjKApjzoiT/GB1GJmdICOZbXjJCiTBbVlsIvFs8A/+Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script>
+<style type=text/css>
+    .code > .CodeMirror {
+        float: left;
+        width: 50%;
+        border: 1px solid black;
+    }
+
+    .preview > .CodeMirror {
+        width: 49%;
+        position: absolute;
+        display: initial;
+        float: right;
+        height: 602px;
+        border: 1px solid black;
+        border-left: 0;
+    }
+</style>
+<article>
+    <h2>FauxPilot preview</h2>
+    <p>Press Ctrl/Command + Enter to copy the suggested code</p>
+    <div class="code">
+        <textarea id=code name=code></textarea>
+    </div>
+    <div class="preview">
+        <textarea id=preview name=preview disabled></textarea>
+    </div>
+    <div class="code">
+        <textarea id=config name=config></textarea>
+    </div>
+    <script>
+        let delay;
+        let editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+            mode: "python",
+            theme: "material-darker",
+            lineWrapping: true,
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            parserConfig: {'pythonVersion': 3, 'strictErrors': true},
+            value: "def hello_world():\n\tprint('Hello World!')"
+        });
+        let preview = CodeMirror.fromTextArea(document.getElementById('preview'), {
+            mode: "python",
+            theme: "material-darker",
+            lineWrapping: true,
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            parserConfig: {'pythonVersion': 3, 'strictErrors': true},
+            readOnly: true,
+        });
+        let config = CodeMirror.fromTextArea(document.getElementById('config'), {
+            mode: "application/json",
+            lineNumbers: true,
+            indentUnit: 4,
+            lint: true,
+        });
+        editor.on("change", function () {
+            clearTimeout(delay);
+            delay = setTimeout(updatePreview, 300);
+        });
+        config.on("change", function () {
+            clearTimeout(delay);
+            delay = setTimeout(updatePreview, 300);
+        });
+
+        function getOpenAIConfig() {
+            fetch("http://0.0.0.0:5432/v1/playground/get_config", {
+                method: "GET",
+                headers: {'Content-Type': 'application/json'},
+            }).then(res => {
+                res.json().then(json => {
+                    config.setValue(JSON.stringify(json, null, 4));
+                });
+            });
+        }
+
+        function updatePreview() {
+            let current_code = editor.getValue();
+            let config_json = JSON.parse(config.getValue());
+            if (current_code.length === 0) {
+                preview.setValue("")
+                return
+            }
+            fetch("http://0.0.0.0:5432/v1/playground", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({...config_json, prompt: current_code})
+            }).then(res => {
+                res.text().then(text => {
+                    preview.setValue(current_code + text);
+                });
+            });
+        }
+
+        function bindKeys(key, fn) {
+            document.addEventListener('keydown', function (e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.code) {
+                        case 'Enter':
+                            editor.setValue(preview.getValue());
+                            editor.setCursor(editor.lineCount(), 0);
+                            break;
+                    }
+                }
+            });
+        }
+
+        bindKeys()
+        getOpenAIConfig();
+        setTimeout(updatePreview, 300);
+
+    </script>
+</article>

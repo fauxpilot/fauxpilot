@@ -1,5 +1,6 @@
 import os
 
+import ujson
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -7,6 +8,8 @@ from sse_starlette.sse import EventSourceResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, status, Response, Depends
 from firebase_admin import auth, credentials, initialize_app
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
 
 from models import OpenAIinput
 from utils.codegen import CodeGenProxy
@@ -24,7 +27,7 @@ app = FastAPI(
     description="This is an attempt to build a locally hosted version of GitHub Copilot. It uses the SalesForce CodeGen"
                 "models inside of NVIDIA's Triton Inference Server with the FasterTransformer backend.",
     docs_url="/",
-    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1},
 )
 
 try:
@@ -59,7 +62,12 @@ class CustomTokenRequest(BaseModel):
     id_token: str
 
 
-@app.post("/v1/auth/get_custom_token")
+class PlaygroundRequest(BaseModel):
+    prompt: str
+    max_tokens: int = 32
+
+
+@app.post("/v1/auth/get_custom_token", include_in_schema=False)
 async def get_custom_token(custom_token_request: CustomTokenRequest):
     try:
         user = auth.verify_id_token(custom_token_request.id_token)
@@ -74,12 +82,35 @@ async def get_custom_token(custom_token_request: CustomTokenRequest):
         )
 
 
+@app.get("/v1/playground/get_config", status_code=200, include_in_schema=False)
+async def playground() -> OpenAIinput:
+    default_config = OpenAIinput().dict()
+    del default_config["prompt"]
+    return default_config
+
+
+@app.post("/v1/playground", status_code=200, include_in_schema=False)
+async def playground(playground_request: PlaygroundRequest):
+    results = await codegen(data=OpenAIinput(
+        prompt=playground_request.prompt,
+        max_tokens=playground_request.max_tokens).dict())
+    parsed_results = ujson.loads(results)
+    return Response(
+        status_code=200,
+        content=parsed_results["choices"][0]["text"],
+        media_type="application/text"
+    )
+
+
+@app.get("/playground")
+async def read_index():
+    return FileResponse('index.html')
+
+
 @app.post("/v1/engines/codegen/completions", status_code=200)
 @app.post("/v1/completions", status_code=200)
 async def completions(data: OpenAIinput, user=Depends(get_user_token)):
     data = data.dict()
-    print(user)
-    print(data)
     if data.get("stream") is not None:
         return EventSourceResponse(
             content=await codegen(data=data),
@@ -95,4 +126,4 @@ async def completions(data: OpenAIinput, user=Depends(get_user_token)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=5432)
+    uvicorn.run("app:app", host="0.0.0.0", port=5432, reload=True)
