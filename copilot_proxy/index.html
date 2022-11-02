@@ -67,7 +67,7 @@
     <script>
         let delay;
         let calls = 0;
-        let editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+        const editorConfig = {
             mode: "python",
             theme: "material-darker",
             lineWrapping: true,
@@ -76,17 +76,10 @@
             matchBrackets: true,
             indentUnit: 4,
             parserConfig: {'pythonVersion': 3, 'strictErrors': true},
-            value: "def hello_world():\n\tprint('Hello World!')"
-        });
+        }
+        let editor = CodeMirror.fromTextArea(document.getElementById('code'), editorConfig);
         let preview = CodeMirror.fromTextArea(document.getElementById('preview'), {
-            mode: "python",
-            theme: "material-darker",
-            lineWrapping: true,
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true,
-            indentUnit: 4,
-            parserConfig: {'pythonVersion': 3, 'strictErrors': true},
+            ...editorConfig,
             readOnly: true,
         });
         let config = CodeMirror.fromTextArea(document.getElementById('config'), {
