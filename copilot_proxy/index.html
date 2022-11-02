@@ -51,8 +51,10 @@
         <img src="https://pbs.twimg.com/media/FgZ99z3XEAAhp8a?format=jpg&name=medium"
              style="position: absolute;width: auto;height: 100px;right: 12px;" alt="logo"/>
     </div>
+    <input type="checkbox" id="manual" name="manual" value="manual">
+    <label for="manual">Use Ctrl/Command + Enter to generate suggestions (Otherwise work continuously)</label><br>
     <div style="display: flex; justify-content: space-between;">
-        <p>Press Ctrl/Command + Enter to copy the suggested code</p>
+        <p>ALT/Option + Enter to copy the suggested code</p>
         <p id="loading" style="width: 49.7%;padding-left: 10px;"></p>
     </div>
     <div class="code">
@@ -67,7 +69,7 @@
     <script>
         let delay;
         let calls = 0;
-        let editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+        const editorConfig = {
             mode: "python",
             theme: "material-darker",
             lineWrapping: true,
@@ -76,17 +78,10 @@
             matchBrackets: true,
             indentUnit: 4,
             parserConfig: {'pythonVersion': 3, 'strictErrors': true},
-            value: "def hello_world():\n\tprint('Hello World!')"
-        });
+        }
+        let editor = CodeMirror.fromTextArea(document.getElementById('code'), editorConfig);
         let preview = CodeMirror.fromTextArea(document.getElementById('preview'), {
-            mode: "python",
-            theme: "material-darker",
-            lineWrapping: true,
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true,
-            indentUnit: 4,
-            parserConfig: {'pythonVersion': 3, 'strictErrors': true},
+            ...editorConfig,
             readOnly: true,
         });
         let config = CodeMirror.fromTextArea(document.getElementById('config'), {
@@ -100,6 +95,9 @@
         editor.on("change", function () {
             calls++;
             clearTimeout(delay);
+            if (document.getElementById('manual').checked) {
+                return
+            }
             delay = setTimeout(updatePreview, 300);
         });
         config.on("change", function () {
@@ -148,9 +146,21 @@
             });
         }
 
-        function bindKeys() {
+        function bindSendKeys() {
             document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey || e.metaKey) {
+                    switch (e.code) {
+                        case 'Enter':
+                            updatePreview();
+                            break;
+                    }
+                }
+            });
+        }
+
+        function bindCopyKeys() {
+            document.addEventListener('keydown', function (e) {
+                if (e.altKey) {
                     switch (e.code) {
                         case 'Enter':
                             editor.setValue(preview.getValue());
@@ -161,7 +171,8 @@
             });
         }
 
-        bindKeys()
+        bindSendKeys()
+        bindCopyKeys()
         getOpenAIConfig();
         setTimeout(updatePreview, 300);
     </script>

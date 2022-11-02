@@ -8,7 +8,6 @@ from sse_starlette.sse import EventSourceResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, status, Response, Depends
 from firebase_admin import auth, credentials, initialize_app
-from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 
 from models import OpenAIinput
