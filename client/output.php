@@ -39,7 +39,6 @@ $data_array = [
 	'stop' => ["\n\n"]
 ];
 
-
 // Initialize a new cURL session
 $url = "http://" . $ini['ip'] . ":".$ini['port'] . "/v1/engines/codegen/completions";
 $curl = curl_init($url);
@@ -51,7 +50,7 @@ curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_POST, true);
 
 // Set the request data as JSON using json_encode function
-curl_setopt($curl, CURLOPT_POSTFIELDS,  json_encode(${data_array}));
+curl_setopt($curl, CURLOPT_POSTFIELDS,  json_encode($data_array));
 
 // Set custom headers for RapidAPI Auth and Content-Type header
 curl_setopt($curl, CURLOPT_HTTPHEADER, [
@@ -65,8 +64,15 @@ curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 // Execute cURL request with all previous settings
 $response = curl_exec($curl);
 
-// Close cURL session
-curl_close($curl);
+if ( $ini['debug'] == 1 ) {
+    echo "<table><tr><td>";
+    echo "<div class='c-warning'>";
+    echo '<b><font color=red>* Dump messages for debugging:</font></b><br>';
+    var_dump($response);
+    echo '<br>';
+    echo '</div>';
+    echo "</td></tr></table>";
+}
 
 
 // Define recursive function to extract nested values
@@ -125,6 +131,8 @@ echo "<br>";
 echo "</td></tr></table>";
 output_check($output);
 
+// Close cURL session
+curl_close($curl);
 ?>
 <a class="butt butt-blue" href="#" onclick="copy_to_clipboard('sc');return false;">Copy Code to Clipboard</a>
 <p>&nbsp;</p>
