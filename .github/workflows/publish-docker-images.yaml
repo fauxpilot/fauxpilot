@@ -1,8 +1,8 @@
 name: Publish Docker Images
 
 on:
-  # `push` will build and public the image with the tag corresponding to the branch name (such as `main`, `master`).
-  # `push tag` will build and public the image with the tag with the same name as git tag (such as `v1.2.3`, `v0.0.1-alpha.1`) and a tag named `latest`.
+  # `push` will build and public the image with a tag corresponding to the branch name (such as `main`, `master`).
+  # `push tag` will build and public the image with a tag has the same name as git tag (such as `v1.2.3`, `v0.0.1-alpha.1`) and a tag named `latest`.
   push:
     branches: [main, master]
     tags: [v*]
@@ -28,6 +28,7 @@ jobs:
       - name: Extract Docker metadata
         uses: docker/metadata-action@v4
         with:
+          # define image name
           images: moyix/copilot_proxy
           # Overwrite labels
           labels: |
@@ -66,6 +67,7 @@ jobs:
       - name: Extract Docker metadata
         uses: docker/metadata-action@v4
         with:
+          # define image name
           images: moyix/model_converter
           # Overwrite labels
           labels: |
