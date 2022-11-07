@@ -140,6 +140,7 @@
                     if (currentCall === calls) {
                         let timeEnd = performance.now();
                         preview.setValue(currentCode + text);
+                        preview.setCursor(editor.lineCount(), 0);
                         loading.innerText = `Returned completion in ${Math.round(timeEnd - timeStart)}ms`;
                     }
                 });
