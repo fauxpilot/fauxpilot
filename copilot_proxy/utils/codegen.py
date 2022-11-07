@@ -79,6 +79,7 @@ class CodeGenProxy:
         prompt_len = input_start_ids.shape[1]
         input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
         max_tokens = data.get('max_tokens', 16)
+        print(f"Prompt length: {prompt_len} max_tokens: {max_tokens}")
         if max_tokens + input_len[0][0] > self.MAX_MODEL_LEN:
             raise ValueError("Max tokens + prompt length exceeds maximum model length")
         output_len = np.ones_like(input_len).astype(np.uint32) * max_tokens
