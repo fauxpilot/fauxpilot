@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 import ujson
 import uvicorn
@@ -82,7 +83,7 @@ async def get_custom_token(custom_token_request: CustomTokenRequest):
 
 
 @app.get("/v1/playground/get_config", status_code=200, include_in_schema=False)
-async def playground() -> OpenAIinput:
+async def playground() -> Dict:
     default_config = OpenAIinput().dict()
     del default_config["prompt"]
     return default_config
