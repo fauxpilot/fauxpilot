@@ -145,7 +145,7 @@ function python_backend(){
         read -rp "Enter your huggingface cache directory [$HOME/.cache/huggingface]: " HF_CACHE_DIR
         HF_CACHE_DIR=${HF_CACHE_DIR:-$HOME/.cache/huggingface}
     else
-        HF_CACHE_DIR="/tmp/hf_cache"
+        HF_CACHE_DIR="$(pwd)/.hf_cache"
     fi
 
     # use int8? Allows larger models to fit in GPU but might be very marginally slower
