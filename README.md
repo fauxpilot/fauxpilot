@@ -1,7 +1,11 @@
+
 # FauxPilot
 
 This is an attempt to build a locally hosted version of [GitHub Copilot](https://copilot.github.com/). It uses the [SalesForce CodeGen](https://github.com/salesforce/CodeGen) models inside of NVIDIA's [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server) with the [FasterTransformer backend](https://github.com/triton-inference-server/fastertransformer_backend/).
 
+<p align="right">
+  <img width="50%" align="right" src="https://user-images.githubusercontent.com/34380/199604776-e08ce261-48d1-4d09-9163-f5ab2f904e55.png">
+</p>
 
 ## Prerequisites
 
