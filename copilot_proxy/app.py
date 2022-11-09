@@ -17,7 +17,8 @@ from utils.codegen import CodeGenProxy
 SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
 
 codegen = CodeGenProxy(
-    host=os.environ.get("TRITON_HOST", "10.128.15.213"),
+    # host=os.environ.get("TRITON_HOST", "10.128.15.213"),
+    host=os.environ.get("TRITON_HOST", "10.128.15.246"),
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )
@@ -47,7 +48,9 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials = Dep
             headers={'WWW-Authenticate': 'Bearer realm="auth_required"'},
         )
     try:
-        decoded_token = auth.verify_id_token(credential.credentials)
+        user = auth.verify_id_token(credential.credentials)
+        if not auth.get_user_by_email(user['email']).custom_claims['allowed']:
+            raise HTTPException
     except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -55,7 +58,7 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials = Dep
             headers={'WWW-Authenticate': 'Bearer error="invalid_token"'},
         )
     res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
-    return decoded_token
+    return user
 
 
 class CustomTokenRequest(BaseModel):
@@ -67,10 +70,16 @@ class PlaygroundRequest(BaseModel):
     max_tokens: int = 32
 
 
+class PlaygroundResponse(BaseModel):
+    results: str
+    metadata: dict
+
 @app.post("/v1/auth/get_custom_token", include_in_schema=False)
 async def get_custom_token(custom_token_request: CustomTokenRequest):
     try:
         user = auth.verify_id_token(custom_token_request.id_token)
+        if not auth.get_user_by_email(user['email']).custom_claims['allowed']:
+            raise HTTPException
         return {
             "id_token": auth.create_custom_token(user["uid"])
         }
@@ -108,20 +117,20 @@ async def read_index():
 @app.post("/v1/engines/codegen/completions", status_code=200)
 @app.post("/v1/completions", status_code=200)
 async def completions(data: OpenAIinput, user=Depends(get_user_token)):
-    data = data.dict()
-    if data.get("stream") is not None:
+    results = await codegen(data.dict())
+    if data.stream is not None:
         return EventSourceResponse(
-            content=await codegen(data=data),
+            content=results,
             status_code=200,
             media_type="text/event-stream"
         )
     else:
         return Response(
             status_code=200,
-            content=await codegen(data=data),
+            content=results,
             media_type="application/json"
         )
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=5432, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=5432)

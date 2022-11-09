@@ -74,11 +74,13 @@ class CodeGenProxy:
         model_name = "fastertransformer"
         prompt = data['prompt']
         n = data.get('n', 1)
-        input_start_ids = np.expand_dims(self.tokenizer.encode(prompt).ids, 0)
+        max_tokens = data.get('max_tokens', 16)
+        tokens = self.tokenizer.encode(prompt)
+        tokens.pad(pad_token="<|endoftext|>", length=self.MAX_MODEL_LEN-max_tokens, direction="left")
+        input_start_ids = np.expand_dims(tokens.ids, 0)
         input_start_ids = np.repeat(input_start_ids, n, axis=0).astype(np.uint32)
         prompt_len = input_start_ids.shape[1]
         input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
-        max_tokens = data.get('max_tokens', 16)
         print(f"Prompt length: {prompt_len} max_tokens: {max_tokens}")
         if max_tokens + input_len[0][0] > self.MAX_MODEL_LEN:
             raise ValueError("Max tokens + prompt length exceeds maximum model length")
