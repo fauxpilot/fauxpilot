@@ -20,7 +20,9 @@ class CodeGenProxy:
         self.PAD_CHAR = 50256
 
         # Max number of tokens the model can handle
-        self.MAX_MODEL_LEN = 548
+        self.MAX_MODEL_LEN = 2048
+        self.MAX_PAD = 484
+        self.max_prompt = 0
 
     @staticmethod
     def prepare_tensor(name: str, tensor_input):
@@ -76,12 +78,14 @@ class CodeGenProxy:
         n = data.get('n', 1)
         max_tokens = data.get('max_tokens', 16)
         tokens = self.tokenizer.encode(prompt)
-        tokens.pad(pad_token="<|endoftext|>", length=self.MAX_MODEL_LEN-max_tokens, direction="left")
+        tokens.pad(pad_token="<|endoftext|>", length=min(self.MAX_MODEL_LEN-max_tokens, self.MAX_PAD), direction="left")
         input_start_ids = np.expand_dims(tokens.ids, 0)
         input_start_ids = np.repeat(input_start_ids, n, axis=0).astype(np.uint32)
         prompt_len = input_start_ids.shape[1]
         input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
-        print(f"Prompt length: {prompt_len} max_tokens: {max_tokens}")
+        # update max prompt len
+        self.max_prompt = max(self.max_prompt, prompt_len)
+        print(f"Prompt length: {prompt_len} max_tokens: {max_tokens}, max_prompt: {self.max_prompt}")
         if max_tokens + input_len[0][0] > self.MAX_MODEL_LEN:
             raise ValueError("Max tokens + prompt length exceeds maximum model length")
         output_len = np.ones_like(input_len).astype(np.uint32) * max_tokens

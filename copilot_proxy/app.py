@@ -20,8 +20,8 @@ from utils.codegen import CodeGenProxy
 SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
 
 codegen = CodeGenProxy(
-    # host=os.environ.get("TRITON_HOST", "10.128.15.213"),  # 40G
-    host=os.environ.get("TRITON_HOST", "10.128.15.246"),   # 80G
+    # host=os.environ.get("TRITON_HOST", "10.128.15.213"),  # 40GB
+    host=os.environ.get("TRITON_HOST", "10.128.15.246"),   # 80GB
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )
