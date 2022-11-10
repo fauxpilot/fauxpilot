@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import Dict
 
@@ -11,14 +12,16 @@ from fastapi import HTTPException, status, Response, Depends
 from firebase_admin import auth, credentials, initialize_app
 from starlette.responses import FileResponse
 
+from copilot_proxy.utils.post_process import clean_test_code
+from copilot_proxy.utils.pre_process import extract_functions_names
 from models import OpenAIinput
 from utils.codegen import CodeGenProxy
 
 SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
 
 codegen = CodeGenProxy(
-    # host=os.environ.get("TRITON_HOST", "10.128.15.213"),
-    host=os.environ.get("TRITON_HOST", "10.128.15.246"),
+    # host=os.environ.get("TRITON_HOST", "10.128.15.213"),  # 40G
+    host=os.environ.get("TRITON_HOST", "10.128.15.246"),   # 80G
     port=os.environ.get("TRITON_PORT", 8001),
     verbose=os.environ.get("TRITON_VERBOSITY", False)
 )
@@ -114,9 +117,41 @@ async def read_index():
     return FileResponse('index.html')
 
 
+@app.post("/v1/generate-tests", status_code=200)
+async def generate_tests(data: OpenAIinput, user=Depends(get_user_token)):
+    prompts = []
+    try:
+        functions_names = extract_functions_names(data.prompt)
+    except Exception as exc:
+        print({"error": "extract_functions_names()", "message": str(exc)})
+        raise HTTPException(status_code=400, detail="Unable to extract functions names")
+    for function in functions_names:
+        prompt = "import pytest" + "\n" + data.prompt + "\n\n" + "# unittest" + "\n" + f"def test_{function}():" + "\n"
+        prompts.append(prompt)
+    requests = [codegen({**data.dict(), "prompt": prompt}) for prompt in prompts]
+    results = await asyncio.gather(*requests)
+    unit_tests = []
+    for function_name, unit_test in zip(functions_names, results):
+        try:
+            code = ujson.loads(unit_test)["choices"][0]["text"]
+            test_code = f"def test_{function_name}():" + "\n" + code
+            clean_code = clean_test_code(test_code)
+            if clean_code:
+                unit_tests.append({"text": clean_code})
+        except Exception as exc:
+            continue
+    return Response(
+        status_code=200,
+        content=ujson.dumps({"choices": unit_tests}),
+        media_type="application/json"
+    )
+
+
 @app.post("/v1/engines/codegen/completions", status_code=200)
 @app.post("/v1/completions", status_code=200)
 async def completions(data: OpenAIinput, user=Depends(get_user_token)):
+    if data.user == "TCP":
+        return await generate_tests(data)
     results = await codegen(data.dict())
     if data.stream is not None:
         return EventSourceResponse(

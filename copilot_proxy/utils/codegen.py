@@ -20,7 +20,7 @@ class CodeGenProxy:
         self.PAD_CHAR = 50256
 
         # Max number of tokens the model can handle
-        self.MAX_MODEL_LEN = 2048
+        self.MAX_MODEL_LEN = 548
 
     @staticmethod
     def prepare_tensor(name: str, tensor_input):
