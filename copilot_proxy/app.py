@@ -12,9 +12,9 @@ from fastapi import HTTPException, status, Response, Depends
 from firebase_admin import auth, credentials, initialize_app
 from starlette.responses import FileResponse
 
-from copilot_proxy.utils.post_process import clean_test_code
-from copilot_proxy.utils.pre_process import extract_functions_names
 from models import OpenAIinput
+from utils.post_process import clean_test_code
+from utils.pre_process import extract_functions_names
 from utils.codegen import CodeGenProxy
 
 SHOULD_AUTHENTICATE = os.getenv('SHOULD_AUTHENTICATE', 'false').lower() == 'true'
