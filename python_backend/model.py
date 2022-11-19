@@ -2,18 +2,23 @@ import json
 
 import torch
 import triton_python_backend_utils as pb_utils
-from torch.utils.dlpack import to_dlpack, from_dlpack
+# Using dlpack causes segfaults on some machines, so not using it for now
+# But it supports zero copy transfer from triton tensors to torch tensors,
+# so worth investigating further
+# from torch.utils.dlpack import to_dlpack, from_dlpack
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
 
 
 def pb2torch(request, name):
     tensor = pb_utils.get_input_tensor_by_name(request, name)
-    return from_dlpack(tensor.to_dlpack())
+    return torch.from_numpy(tensor.as_numpy())
+    # return from_dlpack(tensor.to_dlpack())
 
 
 def torch2pb(name, tensor):
-    return pb_utils.Tensor.from_dlpack(name, to_dlpack(tensor))
+    return pb_utils.Tensor(name, tensor.numpy())
+    # return pb_utils.Tensor.from_dlpack(name, to_dlpack(tensor))
 
 
 class TritonPythonModel:

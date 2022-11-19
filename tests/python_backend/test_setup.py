@@ -161,4 +161,3 @@ def test_python_backend(n_gpus: int):
         # killing docker-compose process doesn't bring down the containers.
         # explicitly stop the containers:
         subprocess.run(["docker-compose", "-f", compose_file, "down"], cwd=curdir, check=True, env=load_test_env())
-    
