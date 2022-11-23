@@ -162,9 +162,8 @@ function python_backend(){
     echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> .env
 
     python3 ./python_backend/init_model.py --model_name "${MODEL}" --org_name "${ORG}" --model_dir "${MODELS_ROOT_DIR}" --use_int8 "${USE_INT8}"
+    bash -c "source .env ; docker compose build"
 }
-
-common_config
 
 # choose backend
 echo "Choose your backend:"
@@ -185,4 +184,4 @@ then
 else
   echo "You can run ./launch.sh to start the FauxPilot server."
   exit 0
-fi;
+fi
