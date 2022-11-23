@@ -138,7 +138,7 @@ def test_python_backend(n_gpus: int):
     docker_proc = None
     try:
         docker_proc = pexpect.pty_spawn.spawn(
-            f"docker-compose -f {compose_file} up",
+            f"docker compose -f {compose_file} up",
             encoding="utf-8",
             cwd=curdir,
             env=load_test_env(),
