@@ -73,13 +73,17 @@ class CodeGenProxy:
         return np.array([flat_ids, offsets], dtype="int32").transpose((1, 0, 2))
 
     def generate(self, data):
-        model_name = "fastertransformer"
         prompt = data['prompt']
         n = data.get('n', 1)
+        model_name = data["model"]
+        # ugly hack to set the data type correctly. Huggingface models want int32, but fastertransformer needs uint32
+        # i could've done the conversion from uint32 to int32 in the model but that'd be inefficient.
+        np_type = np.int32 if model_name.startswith("py-") else np.uint32
+
         input_start_ids = np.expand_dims(self.tokenizer.encode(prompt).ids, 0)
-        input_start_ids = np.repeat(input_start_ids, n, axis=0).astype(np.uint32)
+        input_start_ids = np.repeat(input_start_ids, n, axis=0).astype(np_type)
         prompt_len = input_start_ids.shape[1]
-        input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
+        input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
         max_tokens = data.get('max_tokens', 16)
         prompt_tokens: int = input_len[0][0]
         requested_tokens = max_tokens + prompt_tokens
@@ -90,7 +94,7 @@ class CodeGenProxy:
                 f"{requested_tokens} tokens ({prompt_tokens} in your prompt; {max_tokens} for the completion). "
                 f"Please reduce your prompt; or completion length."
             )
-        output_len = np.ones_like(input_len).astype(np.uint32) * max_tokens
+        output_len = np.ones_like(input_len).astype(np_type) * max_tokens
         num_logprobs = data.get('logprobs', -1)
         if num_logprobs is None:
             num_logprobs = 1
@@ -105,7 +109,7 @@ class CodeGenProxy:
 
         top_p = data.get('top_p', 1.0)
         frequency_penalty = data.get('frequency_penalty', 1.0)
-        runtime_top_k = top_k * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
+        runtime_top_k = top_k * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
         runtime_top_p = top_p * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         beam_search_diversity_rate = 0.0 * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         random_seed = np.random.randint(0, 2 ** 31 - 1, (input_start_ids.shape[0], 1), dtype=np.int32)
@@ -113,9 +117,9 @@ class CodeGenProxy:
         len_penalty = 1.0 * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         repetition_penalty = frequency_penalty * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         is_return_log_probs = want_logprobs * np.ones([input_start_ids.shape[0], 1]).astype(np.bool_)
-        beam_width = (1 * np.ones([input_start_ids.shape[0], 1])).astype(np.uint32)
-        start_ids = self.PAD_CHAR * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
-        end_ids = self.PAD_CHAR * np.ones([input_start_ids.shape[0], 1]).astype(np.uint32)
+        beam_width = (1 * np.ones([input_start_ids.shape[0], 1])).astype(np_type)
+        start_ids = self.PAD_CHAR * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
+        end_ids = self.PAD_CHAR * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
 
         stop_words = data.get('stop', [])
         if stop_words is None:
