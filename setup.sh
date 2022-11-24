@@ -118,6 +118,11 @@ function fastertransformer_backend(){
         docker run --rm -v "${MODELS_ROOT_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
       fi
     fi
+
+    # Not used for this backend but needs to be present
+    HF_CACHE_DIR="$(pwd)/.hf_cache"
+    mkdir -p "$HF_CACHE_DIR"
+    echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> .env
 }
 
 function python_backend(){
