@@ -128,7 +128,7 @@ def test_python_backend(n_gpus: int):
     enter_input(proc, r".*share (your )?huggingface cache[^:]+: ?", "y")
     enter_input(proc, r".*cache directory[^:]+: ?", "")  # default
     enter_input(proc, r".*use int8[^:]+: ?", "n")
-    enter_input(proc, r".*run FauxPilot\? \[y/n\] ", "n")
+    enter_input(proc, r".*run FauxPilot\? \[y/n\] ", "n", timeout=120)
 
     # copy $root/.env to $curdir/test.env
     shutil.copy(str(root/".env"), str(curdir/"test.env"))
