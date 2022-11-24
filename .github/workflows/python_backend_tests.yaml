@@ -14,7 +14,9 @@ jobs:
           pip install -r tests/python_backend/requirements.txt
       - name: Build container
         run: |
-          docker compose build
+          cp tests/python_backend/runner.env .env &&
+          docker compose build &&
+          rm -f .env
       - name: Run tests
         run: pytest tests
 
