@@ -11,7 +11,7 @@ services:
       - ${HF_CACHE_DIR}:/root/.cache/huggingface
     ports:
       - "8000:8000"
-      - "8001:8001"
+      - "${TRITON_PORT}:8001"
       - "8002:8002"
     deploy:
       resources:
