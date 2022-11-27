@@ -1,5 +1,7 @@
 # Codegen Models
 models/*
+# huggingface cache
+.hf_cache/
 
 .vscode/*
 !.vscode/settings.json
