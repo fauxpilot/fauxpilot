@@ -13,13 +13,16 @@ np.finfo(np.dtype("float64"))
 
 
 class CodeGenProxy:
-    def __init__(self, host: str = 'triton', port: int = 8001, verbose: bool = False):
+    def __init__(self, host: str = 'triton', port: int = 8001, verbose: bool = False, truncate_prompt_to_max_tokens: bool = True):
         self.tokenizer = Tokenizer.from_file('/python-docker/cgtok/tokenizer.json')
         self.client = client_util.InferenceServerClient(url=f'{host}:{port}', verbose=verbose)
         self.PAD_CHAR = 50256
 
         # Max number of tokens the model can handle
         self.MAX_MODEL_LEN = 2048
+
+        # If True, automatically truncate the prompt tokens to fit in `self.MAX_MODEL_LEN`
+        self.truncate_prompt_to_max_tokens = truncate_prompt_to_max_tokens
 
     class TokensExceedsMaximum(Exception):
         pass
@@ -76,15 +79,24 @@ class CodeGenProxy:
         prompt = data['prompt']
         n = data.get('n', 1)
         model_name = data["model"]
+        max_tokens = data.get('max_tokens', 16)
         # ugly hack to set the data type correctly. Huggingface models want int32, but fastertransformer needs uint32
         # i could've done the conversion from uint32 to int32 in the model but that'd be inefficient.
         np_type = np.int32 if model_name.startswith("py-") else np.uint32
 
-        input_start_ids = np.expand_dims(self.tokenizer.encode(prompt).ids, 0)
+        prompt_encoding = self.tokenizer.encode(prompt)
+
+        if self.truncate_prompt_to_max_tokens:
+            max_prompt_tokens = self.MAX_MODEL_LEN - max_tokens
+            if max_prompt_tokens > 1:
+                prompt_encoding.truncate(max_prompt_tokens, direction='left')
+            # else a TokensExceedsMaximum error will be thrown later if `max_tokens` is too big
+
+        input_start_ids = np.expand_dims(prompt_encoding.ids, 0)
         input_start_ids = np.repeat(input_start_ids, n, axis=0).astype(np_type)
         prompt_len = input_start_ids.shape[1]
         input_len = prompt_len * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
-        max_tokens = data.get('max_tokens', 16)
+
         prompt_tokens: int = input_len[0][0]
         requested_tokens = max_tokens + prompt_tokens
         if requested_tokens > self.MAX_MODEL_LEN:

@@ -52,7 +52,7 @@ def enter_input(proc: pexpect.spawn, expect: str, input_s: str, timeout: int = 5
     proc.sendline(input_s)
     return after
 
-def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
+def run_common_setup_steps(n_gpus: int = 0, truncate_prompt_to_max_tokens: bool = True) -> pexpect.spawn:
     "Helper function to run common setup steps."
     proc = pexpect.pty_spawn.spawn(
         "./setup.sh 2>&1", encoding="utf-8", cwd=str(root),
@@ -64,6 +64,7 @@ def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
     enter_input(proc, r".*Address for Triton[^:]+: ?", "triton")
     enter_input(proc, r".*Port of Triton[^:]+: ?", "8001")
     enter_input(proc, r".*save your models[^\?]+\? ?", str(test_models_dir.absolute()))
+    enter_input(proc, r".*automatically truncate prompts to fit within the model\?", "y" if truncate_prompt_to_max_tokens else "n")
 
     return proc
 
@@ -109,15 +110,15 @@ def run_inference(
         return response.json()
     return response.json()["choices"][0]["text"]
 
-
 @pytest.mark.parametrize("n_gpus", [0])  # we don't have a GPU on CI
-def test_python_backend(n_gpus: int):
+@pytest.mark.parametrize("truncate_prompt_to_max_tokens", [True, False])
+def test_python_backend(n_gpus: int, truncate_prompt_to_max_tokens: bool):
     """
     Step 1: run $root/setup.sh while passing appropriate options via stdin
     Step 2: run docker-compose up with test.env sourced
     Step 3: call :5000 with appropriate request
     """
-    proc = run_common_setup_steps(n_gpus)
+    proc = run_common_setup_steps(n_gpus, truncate_prompt_to_max_tokens)
 
     choices = enter_input(proc, r".*Choose your backend.*Enter your choice[^:]+: ?", "2")
     assert "[2] Python backend" in choices, "Option 2 should be Python backend"
@@ -130,8 +131,8 @@ def test_python_backend(n_gpus: int):
     enter_input(proc, r".*use int8[^:]+: ?", "n")
     enter_input(proc, r".*run FauxPilot\? \[y/n\] ", "n", timeout=120)
 
-    # copy $root/.env to $curdir/test.env
-    shutil.copy(str(root/".env"), str(curdir/"test.env"))
+    # move $root/.env to $curdir/test.env
+    shutil.move(str(root/".env"), str(curdir/"test.env"))
 
     # run docker-compose up -f docker-compose-{without|with}-gpus.yml
     compose_file = f"docker-compose-with{'' if n_gpus > 0 else 'out'}-gpus.yaml"
@@ -154,6 +155,14 @@ def test_python_backend(n_gpus: int):
         assert response["choices"][0]["text"].rstrip() == '    print("Hello World")\n\nhello_world()\n\n#'
         assert response["choices"][0]["finish_reason"] == "length"
 
+        # Test whether oversize prompts gets truncated
+        my_very_long_prompt="\n".join(["hello world"] * 4096)
+        if truncate_prompt_to_max_tokens:
+            # should run without any errors
+            run_inference(my_very_long_prompt, max_tokens=16, return_all=True)
+        else:
+            with pytest.raises(requests.HTTPError, match='400 Client Error: Bad Request for url'):
+                run_inference(my_very_long_prompt, max_tokens=16, return_all=True)
     finally:
         if docker_proc is not None and docker_proc.isalive():
             docker_proc.kill(signal.SIGINT)

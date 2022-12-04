@@ -13,10 +13,20 @@ from utils.errors import FauxPilotException
 
 logging.config.dictConfig(uvicorn_logger)
 
+def _strtobool(string: str) -> bool:
+    """Copy of distutils.util.strtobool, since it will be removed in Python 3.11"""
+    if string.lower() in ("y", "yes", "t", "true", "on", "1"):
+        return True
+    elif string.lower() in ("n", "no", "f", "false", "off", "0"):
+        return False
+    else:
+        raise ValueError(f"string {string} could not be parsed as a booelan option")
+
 codegen = CodeGenProxy(
     host=os.environ.get("TRITON_HOST", "triton"),
     port=os.environ.get("TRITON_PORT", 8001),
-    verbose=os.environ.get("TRITON_VERBOSITY", False)
+    verbose=os.environ.get("TRITON_VERBOSITY", False),
+    truncate_prompt_to_max_tokens=_strtobool(os.environ.get("FAUXPILOT_TRUNCATE_PROMPT", "1"))
 )
 
 app = FastAPI(

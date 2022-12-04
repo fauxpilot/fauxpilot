@@ -47,12 +47,20 @@ else
 fi
 mkdir -p "$MODELS_ROOT_DIR"
 
+read -rp "Do you want to automatically truncate prompts to fit within the model? (otherwise the model will throw an error when given too much data) y/n [y]: " TRUNCATE_PROMPT
+if [[ ${TRUNCATE_PROMPT:-y} =~ ^[Nn]$ ]]; then
+    FAUXPILOT_TRUNCATE_PROMPT=0
+else
+    FAUXPILOT_TRUNCATE_PROMPT=1
+fi
+
 # Write .env
 echo "NUM_GPUS=${NUM_GPUS}" >> .env
 echo "GPUS=$(seq 0 $(( NUM_GPUS - 1)) | paste -s -d ',' -)" >> .env
 echo "API_EXTERNAL_PORT=${API_EXTERNAL_PORT}" >> .env
 echo "TRITON_HOST=${TRITON_HOST}" >> .env
 echo "TRITON_PORT=${TRITON_PORT}" >> .env
+echo "FAUXPILOT_TRUNCATE_PROMPT=${FAUXPILOT_TRUNCATE_PROMPT}" >> .env
 
 ############### Backend specific configuration ###############
 
