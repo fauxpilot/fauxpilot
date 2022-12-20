@@ -7,24 +7,23 @@ if [ ! -f .env ]; then
 fi
 source .env
 
-function help() {
+function showhelp () {
    # Display Help
    echo
    echo "Usage: $0 [option...]"
    echo "options:"
-   echo "-h, --help       Print this Help."
-   echo "-d, --daemon     Start with a daemon mode."
+   echo "  -h       Print this help."
+   echo "  -d       Start in daemon mode."
    echo
 }
 
-while getopts ":h:d" option; do
+while getopts "hd" option; do
    case $option in
       h)
-         help
+         showhelp
          exit;;
       d)
          options="-d"
-         echo "-d option"
          ;;
      \?) # incorrect option
          echo "Error: Invalid option"
