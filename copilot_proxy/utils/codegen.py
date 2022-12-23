@@ -234,8 +234,8 @@ class CodeGenProxy:
         for c in choices:
             completion['id'] = self.random_completion_id()
             completion['choices'] = [c]
-            yield f'data: {json.dumps(completion)}\n\n'
-        yield 'data: [DONE]\n\n'
+            yield f'{json.dumps(completion)}\n\n'
+        yield '[DONE]\n\n'
 
     def non_streamed_response(self, completion, choices) -> str:
         completion['id'] = self.random_completion_id()
