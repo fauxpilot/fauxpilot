@@ -97,7 +97,7 @@ class CodeGenProxy:
         output_len = np.ones_like(input_len).astype(np_type) * max_tokens
         num_logprobs = data.get('logprobs', -1)
         if num_logprobs is None:
-            num_logprobs = 1
+            num_logprobs = -1
         want_logprobs = num_logprobs > 0
 
         temperature = data.get('temperature', 0.2)
@@ -246,8 +246,15 @@ class CodeGenProxy:
         st = time.time()
         try:
             completion, choices = self.generate(data)
-        except InferenceServerException as E:
-            print(E)
+        except InferenceServerException as exc:
+            # status: unavailable -- this happens if the `model` string is invalid
+            print(exc)
+            if exc.status() == 'StatusCode.UNAVAILABLE':
+                print(
+                    f"WARNING: Model '{data['model']}' is not available. Please ensure that "
+                    "`model` is set to either 'fastertransformer' or 'py-model' depending on "
+                    "your installation"
+                )
             completion = {}
             choices = []
         ed = time.time()
