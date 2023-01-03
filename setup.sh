@@ -167,7 +167,7 @@ function python_backend(){
     echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> .env
 
     python3 ./python_backend/init_model.py --model_name "${MODEL}" --org_name "${ORG}" --model_dir "${MODELS_ROOT_DIR}" --use_int8 "${USE_INT8}"
-    bash -c "source .env ; docker compose build"
+    bash -c "source .env ; docker compose build || docker-compose build"
 }
 
 # choose backend
