@@ -7,5 +7,12 @@
 # all member IDs directly to avoid unexpected situations.
 
 # In order that all members of a repository are supposed to review each other
-* @moyix
-documentation @moyix @leemgs
+* @moyix @thakkarparth007 @fdegier
+converter                    @moyix
+copilot_proxy                @moyix @thakkarparth007
+python_backend               @moyix @thakkarparth007
+tests                        @moyix
+documentation                @moyix @thakkarparth007 @fdegier @leemgs
+docker-compose.yaml          @moyix @thakkarparth007 @fdegier @leemgs
+Dockerfile                   @moyix @thakkarparth007 @fdegier @leemgs
+copilot_proxy/Dockerfile     @moyix @thakkarparth007 @fdegier @leemgs
