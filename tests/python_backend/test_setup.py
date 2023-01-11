@@ -78,13 +78,13 @@ def load_test_env():
     return env
 
 def run_inference(
-    prompt: str, model_name: str = "py-model", port: int = 5000, return_all: bool = False,
+    prompt: str, model: str = "py-model", port: int = 5000, return_all: bool = False,
     **kwargs
 ) -> Union[str, Dict]:
     "Invokes the copilot proxy with the given prompt and returns the completion"
     endpoint = f"http://localhost:{port}/v1/engines/codegen/completions"
     data = {
-        "model": model_name,
+        "model": model,
         "prompt": prompt,
         "suffix": kwargs.get("suffix", ""),
         "max_tokens": kwargs.get("max_tokens", 16),
