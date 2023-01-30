@@ -31,5 +31,10 @@ while getopts "hd" option; do
    esac
 done
 
-# On newer versions, docker-compose is docker compose
-docker compose up $options --remove-orphans || docker-compose up $options --remove-orphans
+# On versions above 20.10.2, docker-compose is docker compose
+smaller=$(printf "$(docker --version | egrep -o '[0-9]+\.[0-9]+\.[0-9]+')\n20.10.2" | sort -V | head -n1)
+if [[ "$smaller" == "20.10.2" ]]; then
+  docker compose up $options --remove-orphans --build
+else
+  docker-compose up $options --remove-orphans --build
+fi;
