@@ -35,6 +35,7 @@ async def fauxpilot_handler(request: Request, exc: FauxPilotException):
     )
 
 @app.post("/v1/engines/codegen/completions")
+@app.post("/v1/engines/copilot-codex/completions")
 @app.post("/v1/completions")
 async def completions(data: OpenAIinput):
     data = data.dict()
