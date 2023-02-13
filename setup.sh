@@ -154,8 +154,8 @@ function python_backend(){
     fi
 
     # use int8? Allows larger models to fit in GPU but might be very marginally slower
-    read -rp "Do you want to use int8? y/n [y]: " USE_INT8
-    if [[ ${USE_INT8:-y} =~ ^[Nn]$ ]]; then
+    read -rp "Do you want to use int8? y/n [n]: " USE_INT8
+    if [[ ! $USE_INT8 =~ ^[Yy]$ ]]; then
         USE_INT8="0"
     else
         USE_INT8="1"
