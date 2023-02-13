@@ -1,4 +1,4 @@
-We offer some ways to connect to FAUXPILOT Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
+We offer some ways to connect to the FauxPilot Server. For example, you can create a client by how to open the Openai API, Copilot Plugin, REST API.
 
 ## API
 
@@ -64,3 +64,9 @@ And you should be able to use Copilot with your own locally hosted suggestions! 
 Another issue with using the Copilot plugin is that its tokenizer (the component that turns text into a sequence of integers for the model) is slightly different from the one used by CodeGen, so the plugin will sometimes send a request that is longer than CodeGen can handle. You can work around this by replacing the `vocab.bpe` and `tokenizer.json` found in the Copilot extension (something like `.vscode/extensions/github.copilot-[version]/dist/`) with the ones found [here](https://github.com/moyix/fauxpilot/tree/main/copilot_proxy/cgtok/openai_format).
 
 Have fun!
+
+## GitLab - VS Code extentension  
+
+Another option is to use the [GitLab VS Code extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) which has support for FauxPilot.  
+
+Contributions are encouraged :smile: https://gitlab.com/gitlab-org/gitlab-vscode-extension

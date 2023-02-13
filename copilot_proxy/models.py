@@ -1,10 +1,10 @@
 from typing import Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 
 class OpenAIinput(BaseModel):
-    model: str
+    model: constr(regex="^(fastertransformer|py-model)$") = "fastertransformer"
     prompt: Optional[str]
     suffix: Optional[str]
     max_tokens: Optional[int] = 16

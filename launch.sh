@@ -1,19 +1,40 @@
 #!/usr/bin/env bash
 
-# Read in config.env file; error if not found
-if [ ! -f config.env ]; then
-    echo "config.env not found, please run setup.sh"
-    exit 1
+# Read in .env file; error if not found
+if [ ! -f .env ]; then
+    echo ".env not found, running setup.sh"
+    bash setup.sh
 fi
-source config.env
+source .env
 
-export NUM_GPUS=${NUM_GPUS}
-export MODEL_DIR="${MODEL_DIR}"/"${MODEL}-${NUM_GPUS}gpu"
-export GPUS=$(seq 0 $(( NUM_GPUS - 1 )) | paste -sd ',')
+function showhelp () {
+   # Display Help
+   echo
+   echo "Usage: $0 [option...]"
+   echo "options:"
+   echo "  -h       Print this help."
+   echo "  -d       Start in daemon mode."
+   echo
+}
 
-# On newer versions, docker-compose is docker compose
-if command -v docker-compose > /dev/null; then
-    docker compose up
+while getopts "hd" option; do
+   case $option in
+      h)
+         showhelp
+         exit;;
+      d)
+         options="-d"
+         ;;
+     \?) # incorrect option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+# On versions above 20.10.2, docker-compose is docker compose
+smaller=$(printf "$(docker --version | egrep -o '[0-9]+\.[0-9]+\.[0-9]+')\n20.10.2" | sort -V | head -n1)
+if [[ "$smaller" == "20.10.2" ]]; then
+  docker compose up $options --remove-orphans --build
 else
-    docker-compose up
-fi
+  docker-compose up $options --remove-orphans --build
+fi;
