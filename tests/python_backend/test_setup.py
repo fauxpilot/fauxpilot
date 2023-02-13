@@ -1,9 +1,11 @@
-"Tests setup script (currently for Python backend)"
+"""
+Tests setup script (currently for Python backend)
+"""
 
 import os
-import subprocess
-import signal
 import shutil
+import signal
+import subprocess
 from pathlib import Path
 from typing import Dict, Union
 
@@ -14,30 +16,37 @@ import requests
 curdir = Path(__file__).parent
 root = curdir.parent.parent
 
-test_models_dir = curdir/"models"
+test_models_dir = curdir.joinpath("models")
 
 
 def setup_module():
-    "Setup steps for tests in this module"
-    assert (root/"setup.sh").exists(), "setup.sh not found"
-    if (root/".env").exists():
-        shutil.move(str(root/".env"), str(root/".env.bak"))
+    """
+    Setup steps for tests in this module
+    """
+    assert root.joinpath("setup.sh").exists(), "setup.sh not found"
+    if root.joinpath(".env").exists():
+        shutil.move(str(root.joinpath(".env")), str(root.joinpath(".env.bak")))
 
 def teardown_module():
-    "Teardown steps for tests in this module"
-    if (root/".env.bak").exists():
-        shutil.move(str(root/".env.bak"), str(root/".env"))
+    """
+    Teardown steps for tests in this module
+    """
+    if root.joinpath(".env.bak").exists():
+        shutil.move(str(root.joinpath(".env.bak")), str(root.joinpath(".env")))
     try:
-        if test_models_dir.exists():
+        if test_models_dir:
             shutil.rmtree(test_models_dir)
     except Exception as exc:
         print(
             f"WARNING: Couldn't delete `{test_models_dir}` most likely due to permission issues."
-            f"Run the tests with sudo to ensure this gets deleted automatically, or else delete manually. Exception: {exc}"
+            f"Run the tests with sudo to ensure this gets deleted automatically, or else delete manually. "
+            f"Exception: {exc}"
         )
 
 def enter_input(proc: pexpect.spawn, expect: str, input_s: str, timeout: int = 5) -> str:
-    "Helper function to enter input for a given prompt. Returns consumed output."
+    """
+    Helper function to enter input for a given prompt. Returns consumed output.
+    """
 
     try:
         proc.expect(expect, timeout=timeout)
@@ -53,7 +62,9 @@ def enter_input(proc: pexpect.spawn, expect: str, input_s: str, timeout: int = 5
     return after
 
 def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
-    "Helper function to run common setup steps."
+    """
+    Helper function to run common setup steps.
+    """
     proc = pexpect.pty_spawn.spawn(
         "./setup.sh 2>&1", encoding="utf-8", cwd=str(root),
     )
@@ -68,10 +79,12 @@ def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
     return proc
 
 def load_test_env():
-    "Load test env vars"
+    """
+    Load test env vars
+    """
     # Without loading default env vars, PATH won't be set correctly
     env = os.environ.copy()
-    with open(curdir/"test.env", "r", encoding="utf8") as test_env:
+    with open(curdir.joinpath("test.env"), "r", encoding="utf8") as test_env:
         for line in test_env:
             key, val = line.strip().split("=")
             env[key] = val
@@ -81,7 +94,9 @@ def run_inference(
     prompt: str, model: str = "py-model", port: int = 5000, return_all: bool = False,
     **kwargs
 ) -> Union[str, Dict]:
-    "Invokes the copilot proxy with the given prompt and returns the completion"
+    """
+    Invokes the copilot proxy with the given prompt and returns the completion
+    """
     endpoint = f"http://localhost:{port}/v1/engines/codegen/completions"
     data = {
         "model": model,
@@ -131,7 +146,7 @@ def test_python_backend(n_gpus: int):
     enter_input(proc, r".*run FauxPilot\? \[y/n\] ", "n", timeout=120)
 
     # copy $root/.env to $curdir/test.env
-    shutil.copy(str(root/".env"), str(curdir/"test.env"))
+    shutil.copy(str(root.joinpath(".env")), str(curdir.joinpath("test.env")))
 
     # run docker-compose up -f docker-compose-{without|with}-gpus.yml
     compose_file = f"docker-compose-with{'' if n_gpus > 0 else 'out'}-gpus.yaml"
@@ -157,7 +172,7 @@ def test_python_backend(n_gpus: int):
     finally:
         if docker_proc is not None and docker_proc.isalive():
             docker_proc.kill(signal.SIGINT)
-        
+
         # killing docker-compose process doesn't bring down the containers.
         # explicitly stop the containers:
         subprocess.run(["docker-compose", "-f", compose_file, "down"], cwd=curdir, check=True, env=load_test_env())

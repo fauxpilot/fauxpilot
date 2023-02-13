@@ -1,0 +1,8 @@
+.hf_cache/
+.idea
+*.md
+.git*
+.enditorconfig
+models
+converter
+tests
