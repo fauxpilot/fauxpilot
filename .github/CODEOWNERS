@@ -1,0 +1,18 @@
+# This is a comment. Each line is a file pattern followed by one or more owners.
+# For more details, visit https://help.github.com/articles/about-codeowners/
+#
+# Note that the current version of github.com (community edition) does not
+# translate "@org/team-name" correctly, although the GitHub webpage depicts how
+# to use "@org/team-name" as well as "@username" format. So, We need to append
+# all member IDs directly to avoid unexpected situations.
+
+# In order that all members of a repository are supposed to review each other
+* @moyix @thakkarparth007 @fdegier
+converter                    @moyix
+copilot_proxy                @moyix @thakkarparth007
+python_backend               @moyix @thakkarparth007
+tests                        @moyix
+documentation                @moyix @thakkarparth007 @fdegier
+docker-compose.yaml          @moyix @thakkarparth007 @fdegier
+Dockerfile                   @moyix @thakkarparth007 @fdegier 
+copilot_proxy/Dockerfile     @moyix @thakkarparth007 @fdegier 

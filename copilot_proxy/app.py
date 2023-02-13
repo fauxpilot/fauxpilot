@@ -34,7 +34,18 @@ async def fauxpilot_handler(request: Request, exc: FauxPilotException):
         content=exc.json()
     )
 
+# Used to support copilot.vim 
+@app.get("/copilot_internal/v2/token")
+def get_copilot_token():
+    content = {'token': '1', 'expires_at': 2600000000, 'refresh_in': 900}
+    return JSONResponse(
+        status_code=200,
+        content=content
+    )
+
 @app.post("/v1/engines/codegen/completions")
+# Used to support copilot.vim 
+@app.post("/v1/engines/copilot-codex/completions")
 @app.post("/v1/completions")
 async def completions(data: OpenAIinput):
     data = data.dict()

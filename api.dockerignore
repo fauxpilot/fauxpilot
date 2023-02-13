@@ -6,3 +6,4 @@
 models
 converter
 tests
+.pytest_cache
