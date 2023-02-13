@@ -8,10 +8,6 @@ import tritonclient.grpc as client_util
 from tokenizers import Tokenizer
 from tritonclient.utils import np_to_triton_dtype, InferenceServerException
 
-np.finfo(np.dtype("float32"))
-np.finfo(np.dtype("float64"))
-
-
 class CodeGenProxy:
     def __init__(self, host: str = 'triton', port: int = 8001, verbose: bool = False):
         self.tokenizer = Tokenizer.from_file('/python-docker/cgtok/tokenizer.json')
@@ -88,7 +84,6 @@ class CodeGenProxy:
         prompt_tokens: int = input_len[0][0]
         requested_tokens = max_tokens + prompt_tokens
         if requested_tokens > self.MAX_MODEL_LEN:
-            print(1)
             raise self.TokensExceedsMaximum(
                 f"This model's maximum context length is {self.MAX_MODEL_LEN}, however you requested "
                 f"{requested_tokens} tokens ({prompt_tokens} in your prompt; {max_tokens} for the completion). "
@@ -112,7 +107,7 @@ class CodeGenProxy:
         runtime_top_k = top_k * np.ones([input_start_ids.shape[0], 1]).astype(np_type)
         runtime_top_p = top_p * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         beam_search_diversity_rate = 0.0 * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
-        random_seed = np.random.randint(0, 2 ** 31 - 1, (input_start_ids.shape[0], 1), dtype=np.int32)
+        random_seed = np.random.randint(0, 2 ** 31 - 1, (input_start_ids.shape[0], 1), dtype=np.uint64)
         temperature = temperature * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         len_penalty = 1.0 * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)
         repetition_penalty = frequency_penalty * np.ones([input_start_ids.shape[0], 1]).astype(np.float32)

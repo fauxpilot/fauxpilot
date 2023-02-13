@@ -2,5 +2,5 @@ fastapi==0.82.0
 numpy==1.23.2
 sse-starlette==1.1.6
 tokenizers==0.12.1
-tritonclient[all]==2.25.0
+tritonclient[all]==2.29.0
 uvicorn==0.18.3

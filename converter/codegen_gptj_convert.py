@@ -9,7 +9,7 @@ from transformers import CODEGEN_PRETRAINED_MODEL_ARCHIVE_LIST
 
 parser = argparse.ArgumentParser('Convert SalesForce CodeGen model to GPT-J')
 parser.add_argument('--code_model',
-    choices=CODEGEN_PRETRAINED_MODEL_ARCHIVE_LIST, default='Salesforce/codegen-350M-multi',
+    default='Salesforce/codegen-350M-multi',
     help='which SalesForce model to convert'
 )
 parser.add_argument('output_dir', help='where to store the converted model')
@@ -60,7 +60,7 @@ print('Converting...')
 with torch.no_grad():
     cg_model.eval()
     gptj_model.eval()
-    
+
     for name, param in cg_model.named_parameters():
         # print(f'Converting {name}')
         # Handle the qkv weights separately because we need to split them
