@@ -12,7 +12,7 @@ converter                    @moyix
 copilot_proxy                @moyix @thakkarparth007
 python_backend               @moyix @thakkarparth007
 tests                        @moyix
-documentation                @moyix @thakkarparth007 @fdegier @leemgs
-docker-compose.yaml          @moyix @thakkarparth007 @fdegier @leemgs
-Dockerfile                   @moyix @thakkarparth007 @fdegier @leemgs
-copilot_proxy/Dockerfile     @moyix @thakkarparth007 @fdegier @leemgs
+documentation                @moyix @thakkarparth007 @fdegier
+docker-compose.yaml          @moyix @thakkarparth007 @fdegier
+Dockerfile                   @moyix @thakkarparth007 @fdegier 
+copilot_proxy/Dockerfile     @moyix @thakkarparth007 @fdegier 
