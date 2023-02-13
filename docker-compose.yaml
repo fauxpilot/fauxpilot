@@ -28,6 +28,7 @@ services:
     build:
       context: .
       dockerfile: copilot_proxy/Dockerfile
+    command: uvicorn app:app --host 0.0.0.0 --port 5000
     env_file:
       # Automatically created via ./setup.sh
       - .env
