@@ -28,7 +28,7 @@ jobs:
       - name: Extract Docker metadata
         uses: docker/metadata-action@v4
         with:
-          # define image name
+          # Define image name
           images: moyix/copilot_proxy
           # Overwrite labels
           labels: |
@@ -54,41 +54,41 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  publish_model_converter:
-    name: Publish model_converter
-    # The `-latest` runner images are the latest **stable** images that GitHub provides.
-    # Here it is equivalent to `ubuntu-20.04`.
-    runs-on: ubuntu-latest
+  # publish_model_converter:
+  #   name: Publish model_converter
+  #   # The `-latest` runner images are the latest **stable** images that GitHub provides.
+  #   # Here it is equivalent to `ubuntu-20.04`.
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Extract Docker metadata
-        uses: docker/metadata-action@v4
-        with:
-          # define image name
-          images: moyix/model_converter
-          # Overwrite labels
-          labels: |
-            org.opencontainers.image.title=ModelConverter
-            org.opencontainers.image.description=Convert the model to GPT-J to adapt the FasterTransformer Backend.
-            org.opencontainers.image.url=https://github.com/moyix/fauxpilot/tree/main/converter
-            org.opencontainers.image.source=https://github.com/moyix/fauxpilot/tree/main/converter
+  #     - name: Extract Docker metadata
+  #       uses: docker/metadata-action@v4
+  #       with:
+  #         # Define image name
+  #         images: moyix/model_converter
+  #         # Overwrite labels
+  #         labels: |
+  #           org.opencontainers.image.title=ModelConverter
+  #           org.opencontainers.image.description=Convert the model to GPT-J to adapt the FasterTransformer Backend.
+  #           org.opencontainers.image.url=https://github.com/moyix/fauxpilot/tree/main/converter
+  #           org.opencontainers.image.source=https://github.com/moyix/fauxpilot/tree/main/converter
 
-      - name: Login to Docker Hub
-        # Do not login for PRs.
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to Docker Hub
+  #       # Do not login for PRs.
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push images
-        uses: docker/build-push-action@v3
-        with:
-          # For PRs, just build and not push.
-          push: ${{ github.event_name != 'pull_request' }}
-          context: ./converter
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+  #     - name: Build and push images
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         # For PRs, just build and not push.
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         context: ./converter
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}
