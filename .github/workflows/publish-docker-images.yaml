@@ -4,12 +4,12 @@ on:
   # `push` will build and public the image with a tag corresponding to the branch name (such as `main`, `master`).
   # `push tag` will build and public the image with a tag has the same name as git tag (such as `v1.2.3`, `v0.0.1-alpha.1`) and a tag named `latest`.
   push:
-    branches: [main, master]
+    branches: [main]
     tags: [v*]
   # `pull request` will only build to test the image, not publish.
   pull_request:
     # The branches below must be a subset of the branches above.
-    branches: [main, master]
+    branches: [main]
   # `release publish` is almost the same as `push tag`.
   release:
     types: [published]
