@@ -51,6 +51,7 @@ jobs:
           # For PRs, just build and not push.
           push: ${{ github.event_name != 'pull_request' }}
           context: ./copilot_proxy
+          file: proxy.Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
