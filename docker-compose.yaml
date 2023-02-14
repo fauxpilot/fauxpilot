@@ -22,7 +22,7 @@ services:
               capabilities: [gpu]
   copilot_proxy:
     # For dockerhub version
-    image: moyix/copilot_proxy:latest
+    # image: moyix/copilot_proxy:latest
     # For local build
     build:
       context: .
