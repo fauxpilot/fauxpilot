@@ -3,7 +3,7 @@ services:
   triton:
     build:
       context: ../../
-      dockerfile: Dockerfile
+      dockerfile: triton.Dockerfile
     command: bash -c "CUDA_VISIBLE_DEVICES="${GPUS}" mpirun -n 1 --allow-run-as-root /opt/tritonserver/bin/tritonserver --model-repository=/model"
     shm_size: '2gb'
     volumes:
@@ -27,7 +27,7 @@ services:
     # For local build
     build:
       context: ../../
-      dockerfile: copilot_proxy/Dockerfile
+      dockerfile: proxy.Dockerfile
     env_file:
       # Automatically created via ./setup.sh
       - test.env
