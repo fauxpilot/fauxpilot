@@ -13,7 +13,7 @@ jobs:
       - name: 'Greet the contributor'
         uses: garg3133/welcome-new-contributors@v1.2
         with:
-          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           is-oauth-token: true
           issue-message: 'Hello there, thanks for opening your first issue. We
 welcome you to the FauxPilot community!'
