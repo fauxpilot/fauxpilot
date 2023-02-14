@@ -27,6 +27,7 @@ def setup_module():
     if root.joinpath(".env").exists():
         shutil.move(str(root.joinpath(".env")), str(root.joinpath(".env.bak")))
 
+
 def teardown_module():
     """
     Teardown steps for tests in this module
@@ -42,6 +43,7 @@ def teardown_module():
             f"Run the tests with sudo to ensure this gets deleted automatically, or else delete manually. "
             f"Exception: {exc}"
         )
+
 
 def enter_input(proc: pexpect.spawn, expect: str, input_s: str, timeout: int = 5) -> str:
     """
@@ -61,6 +63,7 @@ def enter_input(proc: pexpect.spawn, expect: str, input_s: str, timeout: int = 5
     proc.sendline(input_s)
     return after
 
+
 def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
     """
     Helper function to run common setup steps.
@@ -78,6 +81,7 @@ def run_common_setup_steps(n_gpus: int = 0) -> pexpect.spawn:
 
     return proc
 
+
 def load_test_env():
     """
     Load test env vars
@@ -89,6 +93,7 @@ def load_test_env():
             key, val = line.strip().split("=")
             env[key] = val
     return env
+
 
 def run_inference(
     prompt: str, model: str = "py-model", port: int = 5000, return_all: bool = False,
