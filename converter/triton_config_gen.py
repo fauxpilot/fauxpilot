@@ -20,6 +20,7 @@ parser.add_argument('--template', default=CONFIG_TEMPLATE_PATH, help='Path to th
 parser.add_argument('--model_store', required=True, help='Path to the Triton model store')
 parser.add_argument('--hf_model_dir', required=True, help='Path to HF model directory')
 parser.add_argument('--tokenizer', default='Salesforce/codegen-16B-multi', help='Name or path to the tokenizer')
+parser.add_argument('--rebase', default=None, help='Path to rebase the model store to (e.g. for Docker)')
 parser.add_argument('-n', '--num_gpu', help='Number of GPUs to use', type=int, default=1)
 args = parser.parse_args()
 
@@ -61,8 +62,8 @@ params['is_half'] = is_half
 params['head_num'] = config.n_head
 params['size_per_head'] = config.n_embd // config.n_head
 params['inter_size'] = 4*config.n_embd
-# Vocab size gets rounded up to a multiple of 1024
-params['vocab_size'] = round_up(tokenizer.vocab_size, 1024)
+# Vocab size *sometimes* gets rounded up to a multiple of 1024
+params['vocab_size'] = tokenizer.vocab_size+len(tokenizer.get_added_vocab()) # round_up(tokenizer.vocab_size, 1024)
 params['start_id'] = tokenizer.eos_token_id
 params['end_id'] = tokenizer.eos_token_id
 params['decoder_layers'] = config.n_layer
@@ -70,7 +71,14 @@ params['rotary_embedding'] = config.rotary_dim
 # NOTE: this assumes that the model dir follows the format used by the other conversion scripts
 model_dir = os.path.join(args.model_store, f'{model_name}-{args.num_gpu}gpu')
 weights_path = os.path.join(model_dir, 'fastertransformer', f'{version}', f'{args.num_gpu}-gpu')
-params['checkpoint_path'] = weights_path
+if args.rebase:
+    rebased_model_dir = os.path.join(args.rebase, f'{model_name}-{args.num_gpu}gpu')
+    rebased_weights_path = os.path.join(args.rebase, 'fastertransformer', f'{version}', f'{args.num_gpu}-gpu')
+else:
+    rebased_model_dir = model_dir
+    rebased_weights_path = weights_path
+
+params['checkpoint_path'] = rebased_weights_path
 triton_config = template.substitute(params)
 assert '${' not in triton_config
 
@@ -84,6 +92,10 @@ with open(config_path, 'w') as f:
 
 print('==========================================================')
 print(f'Created config file for {model_name}')
-print(f'  Config:  {config_path}')
-print(f'  Weights: {weights_path}')
+print(f'  Config:      {config_path}')
+print(f'  Weights:     {weights_path}')
+print(f'  Store:       {args.model_store}')
+print(f'  Rebase:      {model_dir} => {args.rebase}')
+print(f'    Weights:   {rebased_weights_path}')
+print(f'  Num GPU:     {args.num_gpu}')
 print('==========================================================')

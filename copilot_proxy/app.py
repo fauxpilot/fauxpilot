@@ -1,11 +1,17 @@
+import logging
 import os
 
 import uvicorn
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
+from config.log_config import uvicorn_logger
 from models import OpenAIinput
 from utils.codegen import CodeGenProxy
+from utils.errors import FauxPilotException
+
+logging.config.dictConfig(uvicorn_logger)
 
 codegen = CodeGenProxy(
     host=os.environ.get("TRITON_HOST", "triton"),
@@ -21,22 +27,48 @@ app = FastAPI(
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
 
+@app.exception_handler(FauxPilotException)
+async def fauxpilot_handler(request: Request, exc: FauxPilotException):
+    return JSONResponse(
+        status_code=400,
+        content=exc.json()
+    )
 
-@app.post("/v1/engines/codegen/completions", status_code=200)
-@app.post("/v1/completions", status_code=200)
+# Used to support copilot.vim 
+@app.get("/copilot_internal/v2/token")
+def get_copilot_token():
+    content = {'token': '1', 'expires_at': 2600000000, 'refresh_in': 900}
+    return JSONResponse(
+        status_code=200,
+        content=content
+    )
+
+@app.post("/v1/engines/codegen/completions")
+# Used to support copilot.vim 
+@app.post("/v1/engines/copilot-codex/completions")
+@app.post("/v1/completions")
 async def completions(data: OpenAIinput):
     data = data.dict()
-    print(data)
+    try:
+        content = codegen(data=data)
+    except codegen.TokensExceedsMaximum as E:
+        raise FauxPilotException(
+            message=str(E),
+            type="invalid_request_error",
+            param=None,
+            code=None,
+        )
+
     if data.get("stream") is not None:
         return EventSourceResponse(
-            content=codegen(data=data),
+            content=content,
             status_code=200,
             media_type="text/event-stream"
         )
     else:
         return Response(
             status_code=200,
-            content=codegen(data=data),
+            content=content,
             media_type="application/json"
         )
 

@@ -1,0 +1,49 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+tab_width = 4
+# end_of_line = crlf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = false
+
+# Markdown
+[*.{md}]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# Serialized data
+[*.{yml,yaml,json,pbtxt}]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# Shell script
+[*.{sh,bash,bashrc,zsh,fish,ksh,csh}]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Environment
+[*.env]
+insert_final_newline = false
+
+# Python requirements
+[requirements.txt]
+insert_final_newline = true
+
+# Dockerfile
+[Dockerfile]
+insert_final_newline = true
