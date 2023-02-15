@@ -1,0 +1,94 @@
+name: Publish Docker Images
+
+on:
+  # `push` will build and public the image with a tag corresponding to the branch name (such as `main`, `master`).
+  # `push tag` will build and public the image with a tag has the same name as git tag (such as `v1.2.3`, `v0.0.1-alpha.1`) and a tag named `latest`.
+  push:
+    branches: [main]
+  # `pull request` will only build to test the image, not publish.
+  pull_request:
+    # The branches below must be a subset of the branches above.
+    branches: [main]
+  # `release publish` is almost the same as `push tag`.
+  release:
+    types: [published]
+
+jobs:
+  publish_copilot_proxy:
+    name: Publish copilot_proxy
+    # The `-latest` runner images are the latest **stable** images that GitHub provides.
+    # Here it is equivalent to `ubuntu-20.04`.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract Docker metadata
+        uses: docker/metadata-action@v4
+        with:
+          # Define image name
+          images: moyix/copilot_proxy
+          # Overwrite labels
+          labels: |
+            org.opencontainers.image.title=CopilotProxy
+            org.opencontainers.image.description=A simple proxy that enables triton to send back copilot compatible communication content.
+            org.opencontainers.image.url=https://github.com/moyix/fauxpilot/tree/main/copilot_proxy
+            org.opencontainers.image.source=https://github.com/moyix/fauxpilot/tree/main/copilot_proxy
+
+      - name: Login to Docker Hub
+        # Do not login for PRs
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push images
+        uses: docker/build-push-action@v3
+        with:
+          # For PRs, just build and not push.
+          push: ${{ github.event_name != 'pull_request' }}
+          context: .
+          file: proxy.Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # publish_model_converter:
+  #   name: Publish model_converter
+  #   # The `-latest` runner images are the latest **stable** images that GitHub provides.
+  #   # Here it is equivalent to `ubuntu-20.04`.
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Extract Docker metadata
+  #       uses: docker/metadata-action@v4
+  #       with:
+  #         # Define image name
+  #         images: moyix/model_converter
+  #         # Overwrite labels
+  #         labels: |
+  #           org.opencontainers.image.title=ModelConverter
+  #           org.opencontainers.image.description=Convert the model to GPT-J to adapt the FasterTransformer Backend.
+  #           org.opencontainers.image.url=https://github.com/moyix/fauxpilot/tree/main/converter
+  #           org.opencontainers.image.source=https://github.com/moyix/fauxpilot/tree/main/converter
+
+  #     - name: Login to Docker Hub
+  #       # Do not login for PRs.
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  #     - name: Build and push images
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         # For PRs, just build and not push.
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         context: ./converter
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}

@@ -6,9 +6,11 @@ from string import Template
 from transformers import GPTJConfig, AutoTokenizer
 import torch
 
+
 def round_up(x, multiple):
     remainder = x % multiple
     return x if remainder == 0 else x + multiple - remainder
+
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG_TEMPLATE_PATH = os.path.join(SCRIPT_DIR, 'config_template.pbtxt')
@@ -63,7 +65,7 @@ params['head_num'] = config.n_head
 params['size_per_head'] = config.n_embd // config.n_head
 params['inter_size'] = 4*config.n_embd
 # Vocab size *sometimes* gets rounded up to a multiple of 1024
-params['vocab_size'] = tokenizer.vocab_size+len(tokenizer.get_added_vocab()) # round_up(tokenizer.vocab_size, 1024)
+params['vocab_size'] = tokenizer.vocab_size+len(tokenizer.get_added_vocab())  # round_up(tokenizer.vocab_size, 1024)
 params['start_id'] = tokenizer.eos_token_id
 params['end_id'] = tokenizer.eos_token_id
 params['decoder_layers'] = config.n_layer
