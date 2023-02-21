@@ -168,7 +168,7 @@ def split_and_convert(args):
                                                                                  ft_model_name_pattern[i])
 
                     pool.starmap(split_and_convert_process,
-                                 [(0, saved_dir, factor, new_name, args,
+                                 [(0, saved_dir, factor, new_name,
                                    weights)], )
 
     pool.close()
