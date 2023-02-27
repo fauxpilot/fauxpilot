@@ -176,7 +176,7 @@ echo "[1] FasterTransformer backend (faster, but limited models)"
 echo "[2] Python backend (slower, but more models, and allows loading with int8)"
 read -rp "Enter your choice [1]: " BACKEND_NUM
 
-if [ "$BACKEND_NUM" -eq 2 ]; then
+if [[ "$BACKEND_NUM" -eq 2 ]]; then
     python_backend
 else
     fastertransformer_backend
