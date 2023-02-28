@@ -22,6 +22,7 @@ function check_dep(){
 check_dep curl
 check_dep zstd
 check_dep docker
+check_dep dpkg
 
 ############### Common configuration ###############
 

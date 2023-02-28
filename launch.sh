@@ -31,10 +31,15 @@ while getopts "hd" option; do
    esac
 done
 
-# On versions above 20.10.2, docker-compose is docker compose
-smaller=$(printf "$(docker --version | egrep -o '[0-9]+\.[0-9]+\.[0-9]+')\n20.10.2" | sort -V | head -n1)
-if [[ "$smaller" == "20.10.2" ]]; then
-  docker compose up $options --remove-orphans --build
+# On versions above 20.10.2, docker-compose is "docker compose".
+DOCKER_STR=$(docker --version)
+DOCKER_VER=$(echo "$DOCKER_STR" | sed -n 's/.*\([0-9]\{2\}\.[0-9]\{2\}\.[0-9]\{2\}\).*/\1/p')
+
+echo "$DOCKER_VER ge 20.10.2"
+if dpkg --compare-versions $DOCKER_VER gt 20.10.2; then
+  DOCKER_CMD="docker-compose"
 else
-  docker-compose up $options --remove-orphans --build
-fi;
+  DOCKER_CMD="docker compose"
+fi
+$DOCKER_CMD up $options --remove-orphans --build
+
