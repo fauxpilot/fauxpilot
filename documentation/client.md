@@ -65,8 +65,3 @@ Another issue with using the Copilot plugin is that its tokenizer (the component
 
 Have fun!
 
-## GitLab - VS Code extentension  
-
-Another option is to use the [GitLab VS Code extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) which has support for FauxPilot.  
-
-Contributions are encouraged :smile: https://gitlab.com/gitlab-org/gitlab-vscode-extension
