@@ -4,7 +4,7 @@ WORKDIR /python-docker
 
 COPY copilot_proxy/requirements.txt requirements.txt
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --disable-pip-version-check --no-cache-dir -r requirements.txt
 
 COPY copilot_proxy .
 
