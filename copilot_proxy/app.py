@@ -57,7 +57,7 @@ async def completions(data: OpenAIinput):
     except codegen.TokensExceedsMaximum as E:
         raise FauxPilotException(
             message=str(E),
-            type="invalid_request_error",
+            error_type="invalid_request_error",
             param=None,
             code=None,
         )
