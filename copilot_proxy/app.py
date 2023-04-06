@@ -62,7 +62,7 @@ async def completions(data: OpenAIinput):
             code=None,
         )
 
-    if data.get("stream") is not None:
+    if data.get("stream", False):
         return EventSourceResponse(
             content=content,
             status_code=200,
