@@ -77,6 +77,8 @@ class TritonPythonModel:
             n_samples = 1  # TODO: client doesn't send this yet. instead it duplicates the request n times
 
             # Generate
+            if torch.cuda.is_available():
+                self.model.to('cuda')
             output_ids = self.model.generate(
                 input_ids=input_ids_torch, attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens, do_sample=True, top_k=top_k, top_p=top_p, num_return_sequences=n_samples,
