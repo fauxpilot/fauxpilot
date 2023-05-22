@@ -76,7 +76,9 @@ with torch.no_grad():
             # GPT-J and CodeGen slice up the qkv projection slightly differently.
             # After a great deal of pain, I figured out that this permutation on
             # the weights of the qkv_proj fixes it.
-            base_permutation = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11]
+            base_permutation = [0, 3, 6, 9,
+                                1, 4, 7, 10, 
+                                2, 5, 8, 11]
             if args.code_model in ["Salesforce/codegen2-1B", "Salesforce/codegen2-3_7B"]:
                 # codegen2-1B and codegen2-3_7B were trained on different mp setting
                 # see: https://github.com/fauxpilot/fauxpilot/issues/202
