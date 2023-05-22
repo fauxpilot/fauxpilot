@@ -19,7 +19,7 @@ parser.add_argument('output_dir', help='where to store the converted model')
 args = parser.parse_args()
 
 print('Loading CodeGen model')
-cg_model = CodeGenForCausalLM.from_pretrained(args.code_model, torch_dtype="auto", trust_remote_code=True)
+cg_model = CodeGenForCausalLM.from_pretrained(args.code_model, torch_dtype="auto", trust_remote_code=bool("codegen2" in args.code_model))
 cg_config = cg_model.config
 
 # Create empty GPTJ model
