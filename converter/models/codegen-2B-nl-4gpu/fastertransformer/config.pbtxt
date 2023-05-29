@@ -1,0 +1,235 @@
+name: "fastertransformer"
+backend: "fastertransformer"
+default_model_filename: "codegen-2B-nl"
+max_batch_size: 1024
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_UINT32
+    dims: [ -1 ]
+  },
+  {
+    name: "start_id"
+    data_type: TYPE_UINT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "end_id"
+    data_type: TYPE_UINT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "input_lengths"
+    data_type: TYPE_UINT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+  },
+  {
+    name: "request_output_len"
+    data_type: TYPE_UINT32
+    dims: [ -1 ]
+  },
+  {
+    name: "runtime_top_k"
+    data_type: TYPE_UINT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "runtime_top_p"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "beam_search_diversity_rate"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "temperature"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "len_penalty"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "repetition_penalty"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "random_seed"
+    data_type: TYPE_INT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "is_return_log_probs"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "beam_width"
+    data_type: TYPE_UINT32
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  },
+  {
+    name: "bad_words_list"
+    data_type: TYPE_INT32
+    dims: [ 2, -1 ]
+    optional: true
+  },
+  {
+    name: "stop_words_list"
+    data_type: TYPE_INT32
+    dims: [ 2, -1 ]
+    optional: true
+  }
+]
+output [
+  {
+    name: "output_ids"
+    data_type: TYPE_UINT32
+    dims: [ -1, -1 ]
+  },
+  {
+    name: "sequence_length"
+    data_type: TYPE_UINT32
+    dims: [ -1 ]
+  },
+  {
+    name: "cum_log_probs"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  },
+  {
+    name: "output_log_probs"
+    data_type: TYPE_FP32
+    dims: [ -1, -1 ]
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_CPU
+  }
+]
+parameters {
+  key: "tensor_para_size"
+  value: {
+    string_value: "4"
+  }
+}
+parameters {
+  key: "pipeline_para_size"
+  value: {
+    string_value: "1"
+  }
+}
+parameters {
+  key: "max_seq_len"
+  value: {
+    string_value: "2048"
+  }
+}
+parameters {
+  key: "is_half"
+  value: {
+    string_value: "1"
+  }
+}
+parameters {
+  key: "head_num"
+  value: {
+    string_value: "32"
+  }
+}
+parameters {
+  key: "size_per_head"
+  value: {
+    string_value: "80"
+  }
+}
+parameters {
+  key: "inter_size"
+  value: {
+    string_value: "10240"
+  }
+}
+parameters {
+  key: "vocab_size"
+  value: {
+    string_value: "51200"
+  }
+}
+parameters {
+  key: "start_id"
+  value: {
+    string_value: "50256"
+  }
+}
+parameters {
+  key: "end_id"
+  value: {
+    string_value: "50256"
+  }
+}
+parameters {
+  key: "decoder_layers"
+  value: {
+    string_value: "32"
+  }
+}
+parameters {
+  key: "model_name"
+  value: {
+    string_value: "codegen-2B-nl"
+  }
+}
+parameters {
+  key: "rotary_embedding"
+  value: {
+    string_value: "64"
+  }
+}
+parameters {
+  key: "model_type"
+  value: {
+    string_value: "GPT-J"
+  }
+}
+parameters {
+  key: "model_checkpoint_path"
+  value: {
+    string_value: "/model/fastertransformer/1/4-gpu"
+  }
+}
+parameters {
+  key: "enable_custom_all_reduce"
+  value: {
+    string_value: "0"
+  }
+}
