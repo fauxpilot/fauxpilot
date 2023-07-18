@@ -138,3 +138,11 @@ fauxpilot-triton-1         | I0803 01:51:04.740608 93 http_server.cc:3303] Start
 fauxpilot-triton-1         | I0803 01:51:04.781561 93 http_server.cc:178] Started Metrics Service at 0.0.0.0:8002
 ```
 
+## Python Setup
+This configuration should work in Windows, but is still experimental:
+```commandline
+pip install -r requirments.txt
+python setup.py
+python launch.py
+```
+

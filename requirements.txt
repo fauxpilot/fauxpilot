@@ -1,0 +1,3 @@
+pyzstd
+python-dotenv
+scipy
