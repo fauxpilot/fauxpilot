@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -f .env ]; then
-    read -rp ".env already exists, do you want to delete .env and recreate it? [y/n] " DELETE
+    read -rp ".env already exists, do you want to delete .env and recreate it? [(y)/n] " DELETE
     if [[ ${DELETE:-y} =~ ^[Yy]$ ]]
     then
       echo "Deleting .env"
@@ -112,10 +112,12 @@ function fastertransformer_backend(){
         curl -L "https://huggingface.co/moyix/${MODEL}-gptj/resolve/main/${MODEL}-${NUM_GPUS}gpu.tar.zst" \
             -o "$ARCHIVE"
         zstd -dc "$ARCHIVE" | tar -xf - -C "${MODELS_ROOT_DIR}"
+        FAILED=$?
         rm -f "$ARCHIVE"
       else
         echo "Downloading and converting the model, this will take a while..."
-        docker run --rm -v "${MODELS_ROOT_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model_converter:latest
+        docker run --rm -v "${MODELS_ROOT_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" moyix/model-converter:latest
+        FAILED=$?
       fi
     fi
 
@@ -168,21 +170,83 @@ function python_backend(){
 
     python3 ./python_backend/init_model.py --model_name "${MODEL}" --org_name "${ORG}" --model_dir "${MODELS_ROOT_DIR}" --use_int8 "${USE_INT8}"
     bash -c "source .env ; docker compose build || docker-compose build"
+    FAILED=$?
+}
+
+function fastertransformer_2_backend(){
+    echo "Models available:"
+    echo "[1] codegen2-1B (?GB total VRAM required; multi-language)"
+    echo "[2] codegen2-3_7B (?GB total VRAM required; multi-language)"
+    echo "[3] codegen2-7B (?GB total VRAM required; multi-language)"
+    echo "[4] codegen2-16B (?GB total VRAM required; multi-language)"
+    # Read their choice
+    read -rp "Enter your choice [3]: " MODEL_NUM
+
+    # Convert model number to model name
+    case $MODEL_NUM in
+        1) MODEL="codegen2-1B" ;;
+        2) MODEL="codegen2-3_7B" ;;
+        3) MODEL="codegen2-7B" ;;
+        4) MODEL="codegen2-16B" ;;
+        *) MODEL="codegen2-7B" ;;
+    esac
+
+    echo "MODEL=${MODEL}" >> .env
+    echo "MODEL_DIR=${MODELS_ROOT_DIR}/${MODEL}-${NUM_GPUS}gpu" >> .env
+
+    if (test -d "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu ); then
+      echo "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+      echo "Converted model for ${MODEL}-${NUM_GPUS}gpu already exists."
+      read -rp "Do you want to re-use it? y/n: " REUSE_CHOICE
+      if [[ ${REUSE_CHOICE:-y} =~ ^[Yy]$ ]]
+      then
+        DOWNLOAD_MODEL=n
+        echo "Re-using model"
+      else
+        DOWNLOAD_MODEL=y
+        rm -rf "$MODELS_ROOT_DIR"/"${MODEL}"-"${NUM_GPUS}"gpu
+      fi
+    else
+      DOWNLOAD_MODEL=y
+    fi
+
+    if [[ ${DOWNLOAD_MODEL:-y} =~ ^[Yy]$ ]]
+    then
+      echo "Downloading and converting the model, this will take a while..."
+      pushd converter
+        docker build -t local/model-converter .
+      popd
+      docker run --rm -v "${MODELS_ROOT_DIR}":/models -e MODEL=${MODEL} -e NUM_GPUS="${NUM_GPUS}" local/model-converter
+      FAILED=$?
+    fi
+
+    # Not used for this backend but needs to be present
+    HF_CACHE_DIR="$(pwd)/.hf_cache"
+    mkdir -p "$HF_CACHE_DIR"
+    echo "HF_CACHE_DIR=${HF_CACHE_DIR}" >> .env
 }
 
 # choose backend
 echo "Choose your backend:"
-echo "[1] FasterTransformer backend (faster, but limited models)"
-echo "[2] Python backend (slower, but more models, and allows loading with int8)"
-read -rp "Enter your choice [1]: " BACKEND_NUM
+echo "[1] FasterTransformer backend (CodeGen 1) (faster, but limited models)"
+echo "[2] Python backend (CodeGen 1) (slower, but more models, and allows loading with int8)"
+echo "[3] FasterTransformer backend (CodeGen 2) (faster, models support more languages)"
+read -rp "Enter your choice [3]: " BACKEND_NUM
 
-if [[ "$BACKEND_NUM" -eq 2 ]]; then
+if [[ "$BACKEND_NUM" -eq 1 ]]; then
+    fastertransformer_backend
+elif [[ "$BACKEND_NUM" -eq 2 ]]; then
     python_backend
 else
-    fastertransformer_backend
+    fastertransformer_2_backend
 fi
 
-read -rp "Config complete, do you want to run FauxPilot? [y/n] " RUN
+if [[ "$FAILED" -ne 0 ]]; then
+    echo "Error in setting up backend, exiting"
+    exit 1
+fi
+
+read -rp "Config complete, do you want to run FauxPilot? [(y)/n] " RUN
 if [[ ${RUN:-y} =~ ^[Yy]$ ]]
 then
   bash ./launch.sh

@@ -7,16 +7,19 @@ from transformers import GPTJForCausalLM, GPTJConfig
 from transformers import CodeGenTokenizer, CodeGenForCausalLM  # noqa: F401
 from transformers import CODEGEN_PRETRAINED_MODEL_ARCHIVE_LIST
 
+CODEGEN_2_LIST = ["Salesforce/codegen2-1B", "Salesforce/codegen2-3_7B", "Salesforce/codegen2-7B", "Salesforce/codegen2-16B"]
+convertable_models = CODEGEN_PRETRAINED_MODEL_ARCHIVE_LIST + CODEGEN_2_LIST
+
 parser = argparse.ArgumentParser('Convert SalesForce CodeGen model to GPT-J')
 parser.add_argument('--code_model',
-                    choices=CODEGEN_PRETRAINED_MODEL_ARCHIVE_LIST, default='Salesforce/codegen-350M-multi',
+                    choices=convertable_models, default='Salesforce/codegen-350M-multi',
                     help='which SalesForce model to convert'
                     )
 parser.add_argument('output_dir', help='where to store the converted model')
 args = parser.parse_args()
 
 print('Loading CodeGen model')
-cg_model = CodeGenForCausalLM.from_pretrained(args.code_model, torch_dtype="auto")
+cg_model = CodeGenForCausalLM.from_pretrained(args.code_model, torch_dtype="auto", trust_remote_code=bool(args.code_model in CODEGEN_2_LIST))
 cg_config = cg_model.config
 
 # Create empty GPTJ model
@@ -70,11 +73,20 @@ with torch.no_grad():
         if 'qkv_proj' in name:
             qkv_proj = param.detach().clone()
             mp_num = 4  # number of cores on their TPU I guess?
-            local_dim = embed_dim // mp_num
             # GPT-J and CodeGen slice up the qkv projection slightly differently.
             # After a great deal of pain, I figured out that this permutation on
             # the weights of the qkv_proj fixes it.
-            base_permutation = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11]
+            base_permutation = [0, 3, 6, 9,
+                                1, 4, 7, 10,
+                                2, 5, 8, 11]
+            if args.code_model in ["Salesforce/codegen2-1B", "Salesforce/codegen2-3_7B"]:
+                # codegen2-1B and codegen2-3_7B were trained on different mp setting
+                # see: https://github.com/fauxpilot/fauxpilot/issues/202
+                base_permutation = [0, 3, 6, 9, 12, 15, 18, 21,
+                                    1, 4, 7, 10, 13, 16, 19, 22,
+                                    2, 5, 8, 11, 14, 17, 20, 23]
+                mp_num = 8
+            local_dim = embed_dim // mp_num
             permutation = torch.cat([torch.arange(i * local_dim, (i + 1) * local_dim) for i in base_permutation])
             # NB: we permute the *rows* here because the computation is xA.T
             new_qkv_proj = qkv_proj[permutation, :]
