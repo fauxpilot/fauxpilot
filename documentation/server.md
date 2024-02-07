@@ -1,7 +1,7 @@
 
 ## Dependencies
 
-When running on a new machine, you will need Docker and the NVIDIA Container Toolkit:
+When running on a new machine, you will need Docker and the NVIDIA Container Toolkit, below are instruction for Linux, other methods of fulfilling the dependencies are possible:
 
 ```sh
 echo "\n\nInstalling docker..."
