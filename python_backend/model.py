@@ -1,4 +1,5 @@
 import json
+import os
 
 import torch
 import triton_python_backend_utils as pb_utils
@@ -25,7 +26,7 @@ class TritonPythonModel:
     def initialize(self, args):
         self.model_config = model_config = json.loads(args["model_config"])
         org_name = model_config["parameters"].get("org_name", {"string_value": "Salesforce"})["string_value"]
-        model_name = org_name + "/" + model_config["parameters"]["model_name"]["string_value"]
+        model_name = os.path.join(org_name, model_config["parameters"]["model_name"]["string_value"])
 
         def get_bool(x):
             return model_config["parameters"][x]["string_value"].lower() in ["1", "true"]
