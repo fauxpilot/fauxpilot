@@ -45,13 +45,25 @@ We offer some ways to connect to FauxPilot Server. For example, you can create a
 
 Please refer to [How to set-up a client](documentation/client.md).
 
+### Copilot configuration for Fauxpilot
+
+To run GitHub Copilot with Fauxpilot in VSCode, open the preference settings.json where the IP is the host you want to use (shift+command+p on mac).
+
+```
+    "github.copilot.advanced": {
+        "model": "fastertransformer",
+        "debug.overrideEngine": "codegen",
+        "debug.testOverrideProxyUrl": "http://<ip-address>:5000",
+        "debug.overrideProxyUrl": "http://<ip-address>:5000"
+    },
+```
 
 ## Terminology
  * API: Application Programming Interface
  * CC: Compute Capability
  * CUDA: Compute Unified Device Architecture
  * FT: Faster Transformer
- * JSON: JavaScript Object Notation 
+ * JSON: JavaScript Object Notation
  * gRPC: Remote Procedure call by Google
- * GPT-J: A transformer model trained using Ben Wang's Mesh Transformer JAX 
+ * GPT-J: A transformer model trained using Ben Wang's Mesh Transformer JAX
  * REST: REpresentational State Transfer

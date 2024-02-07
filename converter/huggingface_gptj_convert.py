@@ -123,7 +123,11 @@ def split_and_convert(args):
         "mlp.dense_4h_to_h.weight",
     ]
 
-    torch.multiprocessing.set_start_method("spawn")
+    try:
+        torch.multiprocessing.set_start_method("spawn")
+    except RuntimeError:
+        pass
+
     pool = multiprocessing.Pool(args.processes)
     for name, param in model.named_parameters():
         if name.find("weight") == -1 and name.find("bias") == -1:

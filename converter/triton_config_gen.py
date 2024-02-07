@@ -22,7 +22,7 @@ parser.add_argument('--template', default=CONFIG_TEMPLATE_PATH, help='Path to th
 parser.add_argument('--model_store', required=True, help='Path to the Triton model store')
 parser.add_argument('--hf_model_dir', required=True, help='Path to HF model directory')
 parser.add_argument('--tokenizer', default='Salesforce/codegen-16B-multi', help='Name or path to the tokenizer')
-parser.add_argument('--rebase', default=None, help='Path to rebase the model store to (e.g. for Docker)')
+parser.add_argument('--rebase', default='/model', help='Path to rebase the model store to (e.g. for Docker)')
 parser.add_argument('-n', '--num_gpu', help='Number of GPUs to use', type=int, default=1)
 args = parser.parse_args()
 

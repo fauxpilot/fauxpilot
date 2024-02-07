@@ -1,42 +1,41 @@
-name: "py-model"
-backend: "python"
-max_batch_size: 4
+name: "fastertransformer"
+backend: "fastertransformer"
+default_model_filename: "codegen2-1B"
+max_batch_size: 1024
 input [
   {
     name: "input_ids"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ -1 ]
   },
   {
-    # UNUSED
     name: "start_id"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
     reshape: { shape: [ ] }
     optional: true
   },
   {
-    # UNUSED
     name: "end_id"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
     reshape: { shape: [ ] }
     optional: true
   },
   {
     name: "input_lengths"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
     reshape: { shape: [ ] }
   },
   {
     name: "request_output_len"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ -1 ]
   },
   {
     name: "runtime_top_k"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
     reshape: { shape: [ ] }
     optional: true
@@ -49,7 +48,6 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "beam_search_diversity_rate"
     data_type: TYPE_FP32
     dims: [ 1 ]
@@ -64,7 +62,6 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "len_penalty"
     data_type: TYPE_FP32
     dims: [ 1 ]
@@ -72,7 +69,6 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "repetition_penalty"
     data_type: TYPE_FP32
     dims: [ 1 ]
@@ -80,7 +76,6 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "random_seed"
     data_type: TYPE_INT32
     dims: [ 1 ]
@@ -88,7 +83,6 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "is_return_log_probs"
     data_type: TYPE_BOOL
     dims: [ 1 ]
@@ -96,22 +90,19 @@ input [
     optional: true
   },
   {
-    # UNUSED
     name: "beam_width"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
     reshape: { shape: [ ] }
     optional: true
   },
   {
-    # UNUSED
     name: "bad_words_list"
     data_type: TYPE_INT32
     dims: [ 2, -1 ]
     optional: true
   },
   {
-    # UNUSED
     name: "stop_words_list"
     data_type: TYPE_INT32
     dims: [ 2, -1 ]
@@ -121,27 +112,25 @@ input [
 output [
   {
     name: "output_ids"
-    data_type: TYPE_INT32
-    dims: [ -1, -1, -1 ]
+    data_type: TYPE_UINT32
+    dims: [ -1, -1 ]
   },
   {
     name: "sequence_length"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
+    dims: [ -1 ]
+  },
+  {
+    name: "cum_log_probs"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  },
+  {
+    name: "output_log_probs"
+    data_type: TYPE_FP32
     dims: [ -1, -1 ]
-  } #,
-# Following is currently unsupported, but should be supported in the future
-#  {
-#    name: "cum_log_probs"
-#    data_type: TYPE_FP32
-#    dims: [ -1 ]
-#  },
-#  {
-#    name: "output_log_probs"
-#    data_type: TYPE_FP32
-#    dims: [ -1, -1 ]
-#  }
+  }
 ]
-# unsure what this is for
 instance_group [
   {
     count: 1
@@ -149,32 +138,98 @@ instance_group [
   }
 ]
 parameters {
-  key: "use_half"
+  key: "tensor_para_size"
   value: {
-    string_value: "${use_half}" # e.g. "0" or "1"
+    string_value: "4"
+  }
+}
+parameters {
+  key: "pipeline_para_size"
+  value: {
+    string_value: "1"
+  }
+}
+parameters {
+  key: "max_seq_len"
+  value: {
+    string_value: "2048"
+  }
+}
+parameters {
+  key: "is_half"
+  value: {
+    string_value: "0"
+  }
+}
+parameters {
+  key: "head_num"
+  value: {
+    string_value: "16"
+  }
+}
+parameters {
+  key: "size_per_head"
+  value: {
+    string_value: "128"
+  }
+}
+parameters {
+  key: "inter_size"
+  value: {
+    string_value: "8192"
+  }
+}
+parameters {
+  key: "vocab_size"
+  value: {
+    string_value: "51200"
+  }
+}
+parameters {
+  key: "start_id"
+  value: {
+    string_value: "50256"
+  }
+}
+parameters {
+  key: "end_id"
+  value: {
+    string_value: "50256"
+  }
+}
+parameters {
+  key: "decoder_layers"
+  value: {
+    string_value: "16"
   }
 }
 parameters {
   key: "model_name"
   value: {
-    string_value: "${model_name}" # e.g. "codegen-350M-multi"
+    string_value: "codegen2-1B"
   }
 }
 parameters {
-  key: "org_name"
+  key: "rotary_embedding"
   value: {
-    string_value: "${org_name}" # e.g. "Salesforce"
+    string_value: "64"
   }
 }
 parameters {
-  key: "use_int8",
+  key: "model_type"
   value: {
-    string_value: "${use_int8}" # e.g. "0" or "1"
+    string_value: "GPT-J"
   }
 }
 parameters {
-  key: "use_auto_device_map",
+  key: "model_checkpoint_path"
   value: {
-    string_value: "${use_auto_device_map}" # e.g. "0" or "1"
+    string_value: "/model/fastertransformer/1/4-gpu"
+  }
+}
+parameters {
+  key: "enable_custom_all_reduce"
+  value: {
+    string_value: "0"
   }
 }
