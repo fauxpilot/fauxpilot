@@ -151,7 +151,7 @@ instance_group [
 parameters {
   key: "use_half"
   value: {
-    string_value: "1"
+    string_value: "${use_half}" # e.g. "0" or "1"
   }
 }
 parameters {
