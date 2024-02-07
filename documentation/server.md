@@ -1,4 +1,30 @@
 
+## Dependencies
+
+When running on a new machine, you will need Docker and the NVIDIA Container Toolkit, below are instruction for Linux, other methods of fulfilling the dependencies are possible:
+
+```sh
+echo "\n\nInstalling docker..."
+#sudo snap install docker
+curl https://get.docker.com | sh \
+  && sudo systemctl --now enable docker
+
+echo "\n\nInstalling docker compose..."
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+echo "\n\nInstalling NVIDIA Container Toolkit..."
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+      && curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+      && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+            sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update
+sudo apt install -y nvidia-container-toolkit-base
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
+```
+
 ## Setup
 
 Run the setup script to choose a model to use. This will download the model from [Huggingface/Moyix](https://huggingface.co/Moyix) in GPT-J format and then convert it for use with FasterTransformer.
